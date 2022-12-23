@@ -1,17 +1,20 @@
 <script setup>
 import { ref } from 'vue';
-import { geoMercator, geoPath } from "d3-geo";
-const { innerWidth, innerHeight } = window;
+import G from './G.vue';
+import Menu from './Menu.vue';
 const { abs, sqrt } = Math;
-
+const { innerWidth, innerHeight } = window;
 const width = ref(innerWidth);
 const height = ref(innerHeight);
-const paths = ref([]);
-const centers = ref([]);
+const scale = ref(1);
+const areas = ref([]);
+const draw = ()=>areas.value = $.app.geomap.main.features.map(e=>e.properties.code).filter(v=>v);
+const codes = ref({});
 const x = ref(0);
 const y = ref(0);
-const scale = ref(1);
 const phone = ref(false);
+
+const { geo } = defineProps({geo: {type: String, default: ''}});
 
 let down = false;
 let downX = 0;
@@ -19,20 +22,6 @@ let downY = 0;
 let lastX = 0;
 let lastY = 0;
 let isClick = true;
-let lcode = 100000;
-
-const draw = (code=lcode, pre=()=>{})=>{
-    const data = $.app.get(code);
-    if(!data) return;
-    pre?.();
-    lcode = code;
-    const s = scale.value;
-    const p = geoMercator().fitSize([width.value*s, height.value*s], data);
-    const d = geoPath(p);
-    const c = c=>c?p(c):null;
-    paths.value = data.features.map(e=>({d: d(e),t: e.properties.name, c: e.properties.code}));
-    centers.value = data.features.map(({properties:{center:ct,name:t}})=>({c:c(ct),t})).filter(e=>e.c);
-}
 
 const reScale = (s, cx, cy) => {
     if(s>200) s = 200;
@@ -41,6 +30,7 @@ const reScale = (s, cx, cy) => {
     [scale.value, s] = [s, s / scale.value];
     x.value = cx - (cx - x.value) * s;
     y.value = cy - (cy - y.value) * s;
+    $.app.geomap.scale(scale.value);
     draw();
 }
 
@@ -72,15 +62,6 @@ const circle = (x, y) => {
     to();
 };
 
-const click = c => {
-    if(isClick) return draw(c, ()=>{
-        scale.value = 1;
-        x.value = 0;
-        y.value = 0;
-    });
-    isClick = true;
-};
-
 const distance = _ => sqrt(abs(lastX-x.value)**2+abs(lastY-y.value)**2);
 
 // 电脑
@@ -104,7 +85,7 @@ const mousemove = e=>{
 const mouseup = _=>down = false;
 
 const wheel = ({deltaY, clientX: x, clientY: y})=>reScale(
-    (deltaY>0?0.9:1.1)*scale.value, x, y
+    (deltaY>0?0.7:1.3)*scale.value, x, y
 );
 
 // 触屏
@@ -154,12 +135,34 @@ const touchScale = ({ touches: [
     reScale(d / touchD * lastS, cx, cy);
 };
 
+const menu = ref({code: 0, name: '', select: 0, x: 0, y: 0, display: 'none'});
+const click = (ccode, [e, code, name]) => {
+    if(!isClick) {
+        isClick = true;
+        return;
+    }
+    e.stopPropagation();
+    menu.value = {
+        ccode, code, name,
+        select: $.app.getLevel(code),
+        x: e.clientX,
+        y: e.clientY,
+        display: 'block'
+    };
+};
+const click2 = ()=>menu.value.display='none';
+const select = ([ccode, code, value])=>{
+    $.app.setLevel(code, value);
+    codes.value[ccode] = Date.now();
+    menu.value.display='none';
+};
+
 document.onkeydown = e=>{
     if(e.key === 'Escape') {
         scale.value = 1;
         x.value = 0;
         y.value = 0;
-        draw(100000);
+        draw();
     }
 };
 
@@ -171,50 +174,70 @@ window.onresize = _=>{
     const dy = y.value - h / 2;
     width.value = innerWidth;
     height.value = innerHeight;
-    draw(lcode, ()=>{
-        x.value = dx / w * innerWidth + innerWidth / 2;
-        y.value = dy / h * innerHeight + innerHeight / 2;
-    });
+    x.value = dx / w * innerWidth + innerWidth / 2;
+    y.value = dy / h * innerHeight + innerHeight / 2;
+    $.app.geomap.resize(width.value, height.value);
+    draw();
 };
-
+$.app.geomap.resize(width.value, height.value);
 draw();
+
 </script>
 
 <template>
-    <div>
-        <svg :viewBox="`0 0 ${width} ${height}`" :width="width" :height="height" :phone="phone"
+    <div class="geo" :key="geo">
+        <svg :viewBox="`0 0 ${width} ${height}`" :width="width" :height="height"
             @mousedown="mousedown" @mousemove="mousemove" @mouseup="mouseup" @wheel="wheel"
-            @touchstart="touchstart" @touchmove="touchmove" @touchend="touchend">
-            <g :transform="`translate(${x},${y})`">
-                <g class="area">
-                    <path v-for="{d, t, c} in paths" :d="d" @click="click(c)">
-                        <title>{{t}}</title>
-                    </path>
-                </g>
-                <g class="center">
-                    <g v-for="{t, c:[x,y]} in centers" :transform="`translate(${x},${y})`">
-                        <circle r="2" />
-                        <text :y="-10">
-                            <tspan>{{t}}<tspan x="0" y="-10">&ZeroWidthSpace;</tspan></tspan>{{t}}
-                        </text>
-                    </g>
-                </g>
-            </g>
-            <g class="c" v-for="[b,c,k] in circles" v-bind="b" :key="k" >
-                <circle :stroke="c" r="20" />
-            </g>
+            @touchstart="touchstart" @touchmove="touchmove" @touchend="touchend" @click="click2">
+            <filter id="hover-shadow">
 
-            <circle r="4" fill="blue"/>
-            <circle r="4" fill="blue" :cy="height" />
-            <circle r="4" fill="blue" :cx="width" />
-            <circle r="4" fill="blue" :cx="width" :cy="height" />
-            <circle r="4" fill="blue" :cx="width/2" :cy="height/2" />
+                <!-- <feMorphology operator="dilate" radius="0" in="SourceAlpha" result="thicken" />
+                <feGaussianBlur in="thicken" stdDeviation="5" result="blurred" />
+                <feFlood flood-color="#000" result="glowColor" />
+                <feComposite in="glowColor" in2="blurred" operator="in" result="softGlow_colored" />
+                <feMerge>
+                    <feMergeNode in="softGlow_colored"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge> -->
+
+                <feFlood flood-color="#000" />
+                <feComposite in2="SourceGraphic" operator="out" />
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feComposite operator="atop" in2="SourceGraphic"/>
+            </filter>
+            <filter id="normal-shadow">
+                <feFlood flood-color="#000" />
+                <feComposite in2="SourceGraphic" operator="out" />
+                <feGaussianBlur stdDeviation="1" result="blur" />
+                <feComposite operator="atop" in2="SourceGraphic"/>
+            </filter>
+            <g :transform="`translate(${x},${y})`">
+                <G v-for="code of areas" :key="`p${scale}_${code}_${codes[code]}`"
+                    :code="code" :scale="scale" @area="d=>click(code, d)"
+                    @hover="areas.sort((a,b)=>a==code?1:b==code?-1:0)"
+                />
+                <G v-for="code of areas" :key="`t${scale}_${code}`"
+                    :code="code" :scale="scale" :t="true"
+                />
+            </g>
         </svg>
+        <Menu class="menu"
+            :ccode="menu.ccode"
+            :code="menu.code"
+            :name="menu.name"
+            :select="menu.select"
+            @select="select"
+            :style="`
+                left: ${menu.x}px;
+                top: ${menu.y}px;
+                display: ${menu.display};
+            `"
+        />
     </div>
 </template>
 
 <style lang="scss" scoped>
-div {
+div.geo {
     margin: 0;
     display: flex;
     top: 0;
@@ -225,86 +248,9 @@ div {
     > svg {
         width: 100%;
         height: 100%;
-
-        > .c > circle {
-            user-select:none;
-            pointer-events: none;
-            fill: #fff0;
-            opacity: 0;
-        }
-
-        > g {
-            > g.area {
-                fill: #eee;
-                stroke: #333;
-                stroke-width: .5;
-                cursor: pointer;
-                > path {
-                    transition: fill .2s;
-                    &:hover {
-                        fill: #ccc;
-                    }
-                }
-            }
-            > g.center {
-                circle {
-                    fill: red;
-                }
-                text {
-                    user-select:none;
-                    pointer-events: none;
-                    text-anchor: middle;
-                    font-size: 11px;
-                    fill: #000;
-                    color: #000;
-                    stroke-width: 0;
-                    font-weight: bold;
-                    > tspan {
-                        fill: #fff;
-                        stroke: #fff;
-                        stroke-width: 2px;
-                        stroke-linejoin: round;
-                        transform: translateX(200px);
-                    }
-                }
-            }
-        }
-
-        &[phone="false"] {
-            @keyframes c1 {
-                0% {
-                    r: 4;
-                    opacity: .1;
-                }
-                100% {
-                    r: 20;
-                    cy: -80;
-                    opacity: 0;
-                }
-            }
-            > .c > circle {
-                animation: c1 .5s;
-            }
-        }
-
-        &[phone="true"] {
-            @keyframes c2 {
-                0% {
-                    cy: -20;
-                    opacity: .4;
-                    transform: scale(0.2);
-                }
-                100% {
-                    cy: -100;
-                    opacity: 0;
-                    transform: scale(1);
-                }
-            }
-            > .c > circle {
-                animation: c2 0.5s;
-            }
-        }
-
+    }
+    > .menu {
+        position: fixed;
     }
 }
 </style>

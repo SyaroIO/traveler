@@ -1,35 +1,57 @@
-export {default as c100000} from './100000.js';
-export {default as c110000} from './110000.js';
-export {default as c120000} from './120000.js';
-export {default as c130000} from './130000.js';
-export {default as c140000} from './140000.js';
-export {default as c150000} from './150000.js';
-export {default as c210000} from './210000.js';
-export {default as c220000} from './220000.js';
-export {default as c230000} from './230000.js';
-export {default as c310000} from './310000.js';
-export {default as c320000} from './320000.js';
-export {default as c330000} from './330000.js';
-export {default as c340000} from './340000.js';
-export {default as c350000} from './350000.js';
-export {default as c360000} from './360000.js';
-export {default as c370000} from './370000.js';
-export {default as c410000} from './410000.js';
-export {default as c420000} from './420000.js';
-export {default as c430000} from './430000.js';
-export {default as c440000} from './440000.js';
-export {default as c450000} from './450000.js';
-export {default as c460000} from './460000.js';
-export {default as c500000} from './500000.js';
-export {default as c510000} from './510000.js';
-export {default as c520000} from './520000.js';
-export {default as c530000} from './530000.js';
-export {default as c540000} from './540000.js';
-export {default as c610000} from './610000.js';
-export {default as c620000} from './620000.js';
-export {default as c630000} from './630000.js';
-export {default as c640000} from './640000.js';
-export {default as c650000} from './650000.js';
-export {default as c710000} from './710000_clear.js';
-export {default as c810000} from './810000.js';
-export {default as c820000} from './820000.js';
+import * as geo from './index.geo.js';
+import { geoMercator, geoPath } from 'd3-geo';
+
+export default class GeoMap {
+    constructor(width=1000, height=1000, scale=1) {
+        this.#w = width;
+        this.#h = height;
+        this.#s = scale;
+        this.#r();
+        geo._.features.forEach(f => {
+            this.#z1[f.properties.code] = f;
+        });
+    }
+
+    #w = 1000;
+    #h = 1000;
+    #s = 1;
+    #projection = geoMercator();
+    #path = geoPath();
+    #z1 = {};
+
+    resize(width, height) {
+        this.#w = width;
+        this.#h = height;
+        this.#r();
+    }
+
+    scale(scale) {
+        this.#s = scale;
+        this.#r();
+    }
+
+    #r() {
+        this.#projection.fitSize([this.#w*this.#s, this.#h*this.#s], geo._);
+        this.#path.projection(this.#projection);
+    }
+
+    get main() {
+        return geo._;
+    }
+
+    z1(code) {
+        return this.#z1[code];
+    }
+
+    get(code='') {
+        return geo[`_${code}`];
+    }
+
+    path(data) {
+        return this.#path(data);
+    }
+
+    projection(data) {
+        return this.#projection(data);
+    }
+}
