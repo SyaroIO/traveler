@@ -26,7 +26,8 @@ const options = [
         <span>{{ props.name }}</span>
         <ul>
             <li v-for="{name, value} of options" :key="value">
-                <input :id="`menu-${value}`" type="radio" :value="value" v-model="select" @change="$emit('select', [props.ccode, props.code, value])" />
+                <input :id="`menu-${value}`" type="radio" :value="value" v-model="select"
+                    @change="$emit('select', [props.ccode, props.code, value])" />
                 <label :for="`menu-${value}`">{{ name }}</label>
             </li>
         </ul>

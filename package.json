@@ -4,20 +4,22 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev-frontend": "vite frontend",
+    "build-frontend": "vite build frontend",
+    "preview-frontend": "vite preview frontend"
   },
   "dependencies": {
-    "d3": "^7.7.0",
-    "d3-geo": "^3.0.1",
+    "d3": "^7.8.5",
+    "d3-geo": "^3.1.0",
     "default-passive-events": "^2.0.0",
-    "sass": "^1.56.2",
-    "vue": "^3.2.41",
-    "ws": "^8.11.0"
+    "koa": "^2.14.2",
+    "sass": "^1.63.6",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.2",
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.2.0",
-    "vite": "^3.2.3"
+    "vite": "^3.2.7"
   }
 }
