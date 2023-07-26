@@ -1,25 +1,25 @@
 {
   "name": "traveler",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
+  "main": "src/index.ts",
   "scripts": {
-    "dev-frontend": "vite frontend",
-    "build-frontend": "vite build frontend",
-    "preview-frontend": "vite preview frontend"
+    "dev": "node .",
+    "vite": "vite frontend",
+    "vite-build": "vite build frontend",
+    "vite-preview": "vite preview frontend"
   },
   "dependencies": {
-    "d3": "^7.8.5",
-    "d3-geo": "^3.1.0",
-    "default-passive-events": "^2.0.0",
     "koa": "^2.14.2",
-    "sass": "^1.63.6",
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.2",
-    "ws": "^8.13.0"
+    "koa-router": "^12.0.0",
+    "koa-static": "^5.0.0",
+    "log4js": "^6.9.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^3.2.0",
-    "vite": "^3.2.7"
+    "@types/koa": "^2.13.7",
+    "@types/koa-router": "^7.4.4",
+    "@types/koa-static": "^4.0.2",
+    "typescript": "^5.1.6"
   }
 }
