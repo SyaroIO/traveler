@@ -1,16 +1,16 @@
+import { Middleware } from 'koa'
 import { URL } from 'url'
-import logger from '../logger/index.js'
+import logger from '@/logger'
 
-export default () => (ctx, next) => {
-    if (ctx.method !== 'GET') return next();
+export default (): Middleware => (ctx, next) => {
+    if (ctx.method !== 'GET') return next()
+    const { pathname } = new URL(ctx.url, 'http://localhost')
     switch (ctx.accepts('html', '*/*')) {
         case 'html':
         case '*/*':
-            const { pathname } = new URL(ctx.url, 'http://localhost');
-            if (pathname.lastIndexOf('.') > pathname.lastIndexOf('/'))
-                break;
+            if (pathname.lastIndexOf('.') > pathname.lastIndexOf('/')) break
             logger.debug('Rewriting', ctx.method, ctx.url, 'to', '/index.html')
-            ctx.url = '/index.html';
+            ctx.url = '/index.html'
     }
     return next()
 }

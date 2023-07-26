@@ -1,24 +1,23 @@
-import { getLogger } from '../logger/index.js'
+import { Middleware } from 'koa'
+import { getLogger } from '@/logger'
 
-const logger = getLogger('request');
-export default () => async (ctx, next) => {
-    const start = Date.now();
-    const { method, url, res } = ctx;
+const logger = getLogger('request')
+export default (): Middleware => async (ctx, next) => {
+    const start = Date.now()
+    const { method, url, res } = ctx
     try {
-        await next();
+        await next()
     } catch (err) {
-        logger.error(method, url, err);
-        throw err;
+        logger.error(method, url, err)
+        throw err
     }
 
-    const done = _ => {
-        res.removeListener('finish', done);
-        res.removeListener('close', done);
-        logger.info(method, url, ctx.status || 404, Date.now() - start, ctx.response.length);
+    const done = () => {
+        res.removeListener('finish', done)
+        res.removeListener('close', done)
+        logger.info(method, url, ctx.status || 404, Date.now() - start, ctx.response.length)
     }
 
-    res.once('finish', done);
-    res.once('close', done);
-};
-
-
+    res.once('finish', done)
+    res.once('close', done)
+}

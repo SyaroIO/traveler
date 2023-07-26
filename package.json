@@ -2,24 +2,31 @@
   "name": "traveler",
   "private": true,
   "version": "0.0.1",
-  "type": "module",
-  "main": "src/index.ts",
+  "main": "src",
   "scripts": {
-    "dev": "node .",
-    "vite": "vite frontend",
-    "vite-build": "vite build frontend",
-    "vite-preview": "vite preview frontend"
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "vite": "cd frontend && pnpm vite",
+    "vite-build": "cd frontend && pnpm build",
+    "vite-preview": "cd frontend && pnpm preview",
+    "lint": "eslint --ext .ts src"
   },
   "dependencies": {
+    "@koa/router": "^12.0.0",
     "koa": "^2.14.2",
-    "koa-router": "^12.0.0",
     "koa-static": "^5.0.0",
     "log4js": "^6.9.1"
   },
   "devDependencies": {
     "@types/koa": "^2.13.7",
-    "@types/koa-router": "^7.4.4",
     "@types/koa-static": "^4.0.2",
+    "@types/koa__router": "^12.0.0",
+    "@types/node": "^20.4.5",
+    "@typescript-eslint/eslint-plugin": "^6.2.0",
+    "eslint": "^8.45.0",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.6"
   }
 }

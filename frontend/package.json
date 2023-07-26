@@ -6,8 +6,8 @@
   "main": "src/main.ts",
   "scripts": {
     "dev": "vite",
-    "build": "vite build frontend",
-    "preview": "vite preview frontend"
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "d3": "^7.8.5",
