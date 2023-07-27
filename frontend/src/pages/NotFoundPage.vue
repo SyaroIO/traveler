@@ -1,6 +1,7 @@
-<template lang="pug">
-div
-    p :( 404
+<template>
+  <div>
+    <p>:( 404</p>
+  </div>
 </template>
 
 <style lang="scss" scoped>

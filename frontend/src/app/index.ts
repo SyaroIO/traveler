@@ -1,19 +1,19 @@
 export default class App {
     #level = new Map()
 
-    debug(...data: any[]) {
+    debug(...data: never[]) {
         this.#logger('debug', data)
     }
-    info(...data: any[]) {
+    info(...data: never[]) {
         this.#logger('info', data)
     }
-    warn(...data: any[]) {
+    warn(...data: never[]) {
         this.#logger('warn', data)
     }
-    error(...data: any[]) {
+    error(...data: never[]) {
         this.#logger('error', data)
     }
-    #logger(level: string, args: any[]) {
+    #logger(level: string, args: never[]) {
         switch (level) {
             case 'debug':
                 console.debug(...args)

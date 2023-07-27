@@ -1,31 +1,32 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory } from 'vue-router'
 
-const index = () => import("./Index.vue");
-const single = () => import("./Single.vue");
-const notfound = () => import("./NotFound.vue");
+const index = () => import('@/pages/IndexPage.vue')
+const single = () => import('@/pages/SinglePage.vue')
+const notfound = () => import('@/pages/NotFoundPage.vue')
 
 const routes = [
-  {
-    path: "/",
-    name: "index",
-    component: index
-  },
-  {
-    path: "/single",
-    name: "single",
-    component: single
-  },
-  {
-    path: "/404",
-    name: "404",
-    component: notfound
-  },
-  {
-    path: "/:catchAll(.*)",
-    redirect: "/404"
-  }
-];
+    {
+        path: '/',
+        name: 'index',
+        component: index
+    },
+    {
+        path: '/single',
+        name: 'single',
+        component: single
+    },
+    {
+        path: '/404',
+        name: '404',
+        component: notfound
+    },
+    {
+        path: '/:catchAll(.*)',
+        redirect: '/404'
+    }
+]
 
 export const router = createRouter({
-  routes, history: createWebHistory(),
-});
+    routes,
+    history: createWebHistory()
+})

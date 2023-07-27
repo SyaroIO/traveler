@@ -1,5 +1,5 @@
 import { geo as data, main } from './geo'
-import { geoMercator, geoPath } from 'd3-geo'
+import { geoMercator, geoPath, GeoPermissibleObjects } from 'd3-geo'
 
 export { main, codes } from './geo'
 export default class Geo {
@@ -44,11 +44,11 @@ export default class Geo {
         return data.get(code)
     }
 
-    path(data: any) {
+    path(data: GeoPermissibleObjects) {
         return this.#path(data) ?? ''
     }
 
-    projection(data: any) {
+    projection(data: [number, number]) {
         return this.#projection(data) ?? [0, 0]
     }
 }

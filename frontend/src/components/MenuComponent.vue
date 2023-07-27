@@ -1,34 +1,47 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 
+defineEmits(['select']);
+
 const props = defineProps({
-    ccode: { type: Number, require: true },
-    code: { type: Number, require: true },
-    name: { type: String, require: true },
+    ccode: { type: Number, require: true, default: 0 },
+    code: { type: Number, require: true, default: 0 },
+    name: { type: String, require: true, default: '' },
     select: { type: Number, default: 0 },
 });
 
 const select = ref(props.select);
 watch(props, (_, props) => select.value = props.select);
 const options = [
-    { name: '清除', value: 0 },
-    { name: '想去', value: 1 },
-    { name: '路过', value: 2 },
-    { name: '去过', value: 3 },
-    { name: '住过', value: 4 },
-    { name: '家乡', value: 5 },
+    { label: '清除', value: 0 },
+    { label: '想去', value: 1 },
+    { label: '路过', value: 2 },
+    { label: '去过', value: 3 },
+    { label: '住过', value: 4 },
+    { label: '家乡', value: 5 },
 ];
 
 </script>
 
-<template lang="pug">
-.menu
-    span {{ props.name }}
-    ul
-        li(v-for='{ name, value } of options' :key='value')
-            input(:id='`menu-${value}`' type='radio' :value='value' v-model='select' @change='$emit("select", [props.ccode, props.code, value])')
-            label(:for='`menu-${value}`') {{ name }}
-
+<template>
+  <div class="menu">
+    <span>{{ props.name }}</span>
+    <ul>
+      <li
+        v-for="{ label, value } of options"
+        :key="value"
+      >
+        <input
+          :id="`menu-${value}`"
+          v-model="select"
+          type="radio"
+          :value="value"
+          @change="$emit('select', [props.ccode, props.code, value])"
+        >
+        <label for="`menu-${value}`">{{ label }}</label>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <style lang="scss" scoped>

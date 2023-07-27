@@ -3,16 +3,13 @@
     "verbose": true,
     "watch": [
         "src",
-        "frontend/src",
-        "frontend/public",
-        "frontend/index.html",
-        "frontend/vite.config.ts"
+        "tsconfig.json"
     ],
     "ignore": [
         "log",
         "node_modules",
         "dist",
-        "frontent/vite.config.ts.*.mjs"
+        "frontent"
     ],
     "delay": "1000",
     "exec": "ts-node src/index.ts",

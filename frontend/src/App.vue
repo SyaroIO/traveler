@@ -1,3 +1,3 @@
-<template lang="pug">
-router-view
+<template>
+  <router-view />
 </template>

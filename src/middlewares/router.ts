@@ -21,6 +21,7 @@ export const router = new Router()
         switch (type) {
             case 'room':
                 break
+            case '':
             default:
                 ctx.status = 404
                 ctx.body = { message: 'Invalid type!' }
@@ -47,6 +48,7 @@ export const router = new Router()
         switch (type) {
             case 'room':
                 break
+            case '':
             default:
                 ctx.status = 404
                 ctx.body = { message: 'Invalid type!' }

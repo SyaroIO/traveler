@@ -1,22 +1,23 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { app } from '@/app';
-import { geo as g, codes as _codes } from '@/geo';
-import G from './G.vue';
-import Menu from './Menu.vue';
+import { geo, codes } from '@/geo';
+import GComponent from './GComponent.vue';
+import MenuComponent from './MenuComponent.vue';
+
+defineProps({ hsl: { type: String, default: '' } });
+
 const { abs, sqrt } = Math;
 const { innerWidth, innerHeight } = window;
 const width = ref(innerWidth);
 const height = ref(innerHeight);
 const scale = ref(1);
 const areas = ref<number[]>([]);
-const draw = () => areas.value = _codes;
-const codes = ref<{ [key: number]: any }>({});
+const draw = () => areas.value = codes;
 const x = ref(0);
 const y = ref(0);
 const phone = ref(false);
 
-const { geo } = defineProps({ geo: { type: String, default: '' } });
 
 let down = false;
 let downX = 0;
@@ -32,37 +33,9 @@ const reScale = (s: number, cx: number, cy: number) => {
     [scale.value, s] = [s, s / scale.value];
     x.value = cx - (cx - x.value) * s;
     y.value = cy - (cy - y.value) * s;
-    g.scale(scale.value);
+    geo.scale(scale.value);
     draw();
 }
-
-const circles = ref<any[]>([]);
-let timeout: NodeJS.Timeout | null = null;
-let idx = 0;
-const circle = (x: number, y: number) => {
-    const t = Date.now();
-    const r = () => Math.random() * 10 + 5;
-    const data = [
-        { transform: `translate(${x + r()},${y + r()})` },
-        `hsl(${Math.random() * 360},100%,50%)`,
-        idx++,
-        t
-    ];
-    if (circles.value.length > 100) circles.value.shift();
-
-    circles.value.push(data);
-
-    if (timeout) return;
-    const to = () => {
-        timeout = setTimeout(() => {
-            const now = Date.now();
-            circles.value = circles.value.filter(c => now - c[3] < 500);
-            timeout = null;
-            if (circles.value.length) to();
-        }, 500);
-    }
-    to();
-};
 
 const distance = () => sqrt(abs(lastX - x.value) ** 2 + abs(lastY - y.value) ** 2);
 
@@ -77,7 +50,6 @@ const mousedown = (e: MouseEvent) => {
 
 const mousemove = (e: MouseEvent) => {
     const { clientX, clientY } = e;
-    circle(clientX, clientY);
     if (!down) return;
     x.value = clientX - downX + lastX || 0;
     y.value = clientY - downY + lastY || 0;
@@ -98,8 +70,8 @@ let cy = 0;
 let lastS = 1;
 
 const touchstart = (e: TouchEvent) => {
+    e.preventDefault();
     phone.value = true;
-    e.returnValue = false;
     if (e.touches.length > 1)
         return touchScale(e);
     down = true;
@@ -110,10 +82,9 @@ const touchstart = (e: TouchEvent) => {
 };
 
 const touchmove = (e: TouchEvent) => {
-    e.returnValue = false;
+    e.preventDefault();
     if (touchS) return touchScale(e);
     const { clientX, clientY } = e.touches[0];
-    circle(clientX, clientY);
     if (!down) return;
     x.value = clientX - downX + lastX || 0;
     y.value = clientY - downY + lastY || 0;
@@ -146,7 +117,7 @@ interface MenuData {
     display: string;
 }
 const menu = ref<MenuData>({ code: 0, name: '', select: 0, x: 0, y: 0, display: 'none', ccode: undefined });
-const click = (ccode: number, [e, code, name]: any[]) => {
+const click = (ccode: number, [e, code, name]: [MouseEvent, number, string]) => {
     if (!isClick) {
         isClick = true;
         return;
@@ -161,9 +132,8 @@ const click = (ccode: number, [e, code, name]: any[]) => {
     };
 };
 const click2 = () => menu.value.display = 'none';
-const select = ([ccode, code, value]: any[]) => {
+const select = ([code, value]: [string, number, number]) => {
     app.setLevel(code, value);
-    codes.value[ccode] = Date.now();
     menu.value.display = 'none';
 };
 
@@ -176,7 +146,7 @@ document.onkeydown = e => {
     }
 };
 
-window.onresize = _ => {
+window.onresize = () => {
     const { innerWidth, innerHeight } = window;
     const w = width.value;
     const h = height.value;
@@ -186,32 +156,87 @@ window.onresize = _ => {
     height.value = innerHeight;
     x.value = dx / w * innerWidth + innerWidth / 2;
     y.value = dy / h * innerHeight + innerHeight / 2;
-    g.resize(width.value, height.value);
+    geo.resize(width.value, height.value);
     draw();
 };
-g.resize(width.value, height.value);
+geo.resize(width.value, height.value);
 draw();
 
 </script>
 
-<template lang="pug">
-.geo(:key='geo')
-    svg(:viewBox='`0 0 ${width} ${height}`' :width='width' :height='height' @mousedown='mousedown' @mousemove='mousemove' @mouseup='mouseup' @wheel='wheel' @touchstart='touchstart' @touchmove='touchmove' @touchend='touchend' @click='click2')
-        filter#hover-shadow
-            feFlood(flood-color='#000')
-            feComposite(in2='SourceGraphic' operator='out')
-            feGaussianBlur(stdDeviation='5' result='blur')
-            feComposite(operator='atop' in2='SourceGraphic')
-        filter#normal-shadow
-            feFlood(flood-color='#000')
-            feComposite(in2='SourceGraphic' operator='out')
-            feGaussianBlur(stdDeviation='1' result='blur')
-            feComposite(operator='atop' in2='SourceGraphic')
-        g(:transform='`translate(${x},${y})`')
-            G(v-for='code of areas' :key='`p${scale}_${code}_${codes[code]}`' :code='code' :scale='scale' @area='d => click(code, d)' @hover='areas.sort((a, b) => a == code ? 1 : b == code ? -1 : 0)')
-            G(v-for='code of areas' :key='`t${scale}_${code}`' :code='code' :scale='scale' :t='true')
-    Menu.menu(:ccode='menu.ccode' :code='menu.code' :name='menu.name' :select='menu.select' @select='select' :style='`left: ${menu.x}px;top: ${menu.y}px;display: ${menu.display};`')
-
+<template>
+  <div class="geo">
+    <svg
+      :viewBox="`0 0 ${width} ${height}`"
+      :width="width"
+      :height="height"
+      @mousedown="mousedown"
+      @mousemove="mousemove"
+      @mouseup="mouseup"
+      @wheel="wheel"
+      @touchstart="touchstart"
+      @touchmove="touchmove"
+      @touchend="touchend"
+      @click="click2"
+    >
+      <filter id="hover-shadow">
+        <feFlood flood-color="#000" />
+        <feComposite
+          in2="SourceGraphic"
+          operator="out"
+        />
+        <feGaussianBlur
+          stdDeviation="5"
+          result="blur"
+        />
+        <feComposite
+          operator="atop"
+          in2="SourceGraphic"
+        />
+      </filter>
+      <filter id="normal-shadow">
+        <feFlood flood-color="#000" />
+        <feComposite
+          in2="SourceGraphic"
+          operator="out"
+        />
+        <feGaussianBlur
+          stdDeviation="1"
+          result="blur"
+        />
+        <feComposite
+          operator="atop"
+          in2="SourceGraphic"
+        />
+      </filter>
+      <g :transform="`translate(${x},${y})`">
+        <GComponent
+          v-for="code of areas"
+          :key="code + 'x' + scale"
+          :code="code"
+          :scale="scale"
+          @area="d => click(code, d)"
+          @hover="areas.sort((a, b) => a == code ? 1 : b == code ? -1 : 0)"
+        />
+        <GComponent
+          v-for="code of areas"
+          :key="code + 'x' + scale"
+          :code="code"
+          :scale="scale"
+          :t="true"
+        />
+      </g>
+    </svg>
+    <MenuComponent
+      class="menu"
+      :ccode="menu.ccode"
+      :code="menu.code"
+      :name="menu.name"
+      :select="menu.select"
+      :style="`left: ${menu.x}px;top: ${menu.y}px;display: ${menu.display};`"
+      @select="select"
+    />
+  </div>
 </template>
 
 <style lang="scss" scoped>
