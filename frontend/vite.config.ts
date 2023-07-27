@@ -6,7 +6,9 @@ import compression from 'vite-plugin-compression'
 export default defineConfig({
     plugins: [vue(), compression()],
     build: {
-        target: 'esnext'
+        target: 'esnext',
+        emptyOutDir: true,
+        outDir: '../dist/frontend'
     },
     resolve: {
         alias: {
