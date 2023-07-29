@@ -3,7 +3,7 @@ import { URL } from 'node:url'
 import serve from 'koa-static'
 import connect from 'koa-connect'
 import vite from 'vite'
-import { getLogger } from '@/logger'
+import { getLogger } from '@/log'
 
 export default async (): Promise<Middleware> => {
     if (process.env.NODE_ENV === 'production') {

@@ -14,9 +14,11 @@
     "lint:check:fix": "eslint --no-error-on-unmatched-pattern --fix src"
   },
   "dependencies": {
+    "crypto-js": "^4.1.1",
     "d3": "^7.8.5",
     "d3-geo": "^3.1.0",
     "default-passive-events": "^2.0.0",
+    "element-plus": "^2.3.8",
     "log4js": "^6.9.1",
     "passthrough-counter": "^1.0.0",
     "vue": "^3.3.4",
@@ -24,6 +26,7 @@
     "ws": "^8.13.0"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.1.1",
     "@types/d3-geo": "^3.0.3",
     "@vitejs/plugin-vue": "^4.2.3",
     "@vue/eslint-config-standard": "^8.0.1",

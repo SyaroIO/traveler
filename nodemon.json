@@ -3,6 +3,8 @@
     "verbose": true,
     "watch": [
         "src",
+        ".env",
+        ".env.template",
         "tsconfig.json"
     ],
     "ignore": [

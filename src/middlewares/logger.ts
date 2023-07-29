@@ -1,5 +1,5 @@
 import { Middleware } from 'koa'
-import { getLogger } from '@/logger'
+import { getLogger } from '@/log'
 
 const logger = getLogger('request')
 export default (): Middleware => async (ctx, next) => {
