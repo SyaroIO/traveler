@@ -3,7 +3,7 @@ import { reactive, ref } from 'vue'
 import { ElMessage, type FormRules } from 'element-plus'
 import { checkEmail, authenticate } from '@/api/user'
 import { asyncValidator } from '@/utils/el'
-import { route } from ':/routers';
+import { show, close } from ':/dialogs';
 
 const form = reactive({ email: '', password: '', })
 const rules = reactive<FormRules<typeof form>>({
@@ -32,10 +32,13 @@ const submit = async () => {
   console.debug({ email, password })
   const { success, code, message } = await authenticate({ email, password })
   isSubmitting.value = false
-  if (success) return ElMessage.success('登录成功')
+  if (success) {
+    close()
+    return ElMessage.success('登录成功')
+  }
   ElMessage.error(`登录失败: [${code}] ${message}`)
   if (code === 3)
-    route('verification')
+    show(show.Dialogs.VerificationDialog)
 }
 </script>
 

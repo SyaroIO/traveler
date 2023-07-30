@@ -2,14 +2,17 @@
 import { ref } from 'vue'
 import { route } from ':/routers'
 import { ElMessage } from 'element-plus'
+import { Dialogs, useDialogStore } from ':/dialogs';
 
+const dialog = useDialogStore()
 const activeIndex = ref('index')
 const handleSelect = (key: string) => {
   switch (key) {
     case 'index':
-    case 'single':
-    case 'authenticate':
-    case 'register': route(key); break;
+    case 'single': route(key); break;
+    case 'authenticate': dialog.show(Dialogs.AuthenticateDialog); break;
+    case 'register': dialog.show(Dialogs.RegisterDialog); break;
+    case 'test': dialog.show(Dialogs.Test); break;
     default: ElMessage.warning('功能开发中'); break;
   }
 }
@@ -44,6 +47,9 @@ const handleSelect = (key: string) => {
     </el-menu-item>
     <el-menu-item index="authenticate">
       登录
+    </el-menu-item>
+    <el-menu-item index="test">
+      测试
     </el-menu-item>
   </el-menu>
 </template>

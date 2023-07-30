@@ -3,7 +3,7 @@ import { reactive, ref } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { checkId, checkEmail, isName, register } from '@/api/user'
 import { asyncValidator } from '@/utils/el'
-import { route } from ':/routers'
+import { show } from ':/dialogs'
 
 const formRef = ref<FormInstance>()
 const form = reactive({
@@ -78,7 +78,7 @@ const submit = async () => {
   if (!success)
     ElMessage.error(`注册失败: [${code}] ${message}`)
   ElMessage.success('注册成功')
-  route('verification')
+  show(show.Dialogs.VerificationDialog)
 }
 </script>
 

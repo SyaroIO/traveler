@@ -1,3 +1,3 @@
-import { createApp } from ':/'
+import { mount } from ':/'
 
-createApp('#app')
+mount('app')

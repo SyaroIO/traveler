@@ -1,6 +1,22 @@
 <script lang="ts" setup>
-import Header from './layouts/HeaderComponent.vue'
-import Footer from './layouts/FooterComponent.vue'
+import Header from ':/layouts/HeaderComponent.vue'
+import Footer from ':/layouts/FooterComponent.vue'
+import { ElLoading } from 'element-plus';
+import { useDialogStore } from ':/dialogs'
+
+const dialog = useDialogStore()
+let loading: any = null;
+
+const dialogPending = () => {
+  loading = ElLoading.service({
+    lock: true,
+    background: 'rgba(0, 0, 0, 0.7)'
+  })
+}
+const dialogResolve = () => {
+  loading?.close()
+  loading = null
+}
 </script>
 
 <template>
@@ -10,6 +26,14 @@ import Footer from './layouts/FooterComponent.vue'
     <el-main><router-view /></el-main>
     <el-footer><Footer /></el-footer>
   </el-container>
+
+  <template v-if="dialog.visible && dialog.component">
+    <el-dialog v-model="dialog.visible" :title="dialog.title">
+      <Suspense @pending="dialogPending" @resolve="dialogResolve">
+        <component :is="dialog.component"></component>
+      </Suspense>
+    </el-dialog>
+  </template>
 </template>
 
 <style lang="scss" scoped>
