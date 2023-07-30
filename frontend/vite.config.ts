@@ -5,15 +5,16 @@ import eslintPlugin from 'vite-plugin-eslint'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [vue(), compression(), eslintPlugin({ cache: false })],
-    build: {
-        target: 'esnext',
-        emptyOutDir: true,
-        outDir: '../dist/frontend'
-    },
-    resolve: {
-        alias: {
-            '@': '/src'
-        }
+  plugins: [vue(), compression(), eslintPlugin()],
+  build: {
+    target: 'esnext',
+    emptyOutDir: true,
+    outDir: '../dist/frontend'
+  },
+  resolve: {
+    alias: {
+      '@': '/src',
+      ':': '/src/interface'
     }
+  }
 })

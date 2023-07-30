@@ -27,8 +27,11 @@
     /* Other */
     "baseUrl": ".",
     "paths": {
-      "@/*": [
+      "@*": [
         "src/*"
+      ],
+      ":*": [
+        "src/interface/*"
       ]
     }
   },

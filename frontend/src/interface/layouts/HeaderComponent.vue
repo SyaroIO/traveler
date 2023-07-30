@@ -1,16 +1,15 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { show } from '@/router'
+import { route } from ':/routers'
 import { ElMessage } from 'element-plus'
 
 const activeIndex = ref('index')
-const handleSelect = (key: string, keyPath: string[]) => {
-  console.debug(key, keyPath);
+const handleSelect = (key: string) => {
   switch (key) {
     case 'index':
     case 'single':
     case 'authenticate':
-    case 'register': show(key); break;
+    case 'register': route(key); break;
     default: ElMessage.warning('功能开发中'); break;
   }
 }

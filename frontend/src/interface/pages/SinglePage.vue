@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { app } from '@/app'
-import Geo from '@/components/GeoComponent.vue'
-import HSL from '@/components/HSLComponent.vue'
+import Geo from ':/components/GeoComponent.vue'
+import HSL from ':/components/HSLComponent.vue'
 
 const [h, s, l] = app.hsl();
 const hsl = { h, s, l };
