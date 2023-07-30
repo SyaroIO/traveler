@@ -5,7 +5,8 @@ import { ElLoading } from 'element-plus';
 import { useDialogStore } from ':/dialogs'
 
 const dialog = useDialogStore()
-let loading: any = null;
+let loading = ElLoading.service({ visible: false });
+loading.close();
 
 const dialogPending = () => {
   loading = ElLoading.service({
@@ -14,8 +15,7 @@ const dialogPending = () => {
   })
 }
 const dialogResolve = () => {
-  loading?.close()
-  loading = null
+  loading.close()
 }
 </script>
 
@@ -28,9 +28,21 @@ const dialogResolve = () => {
   </el-container>
 
   <template v-if="dialog.visible && dialog.component">
-    <el-dialog v-model="dialog.visible" :title="dialog.title">
-      <Suspense @pending="dialogPending" @resolve="dialogResolve">
-        <component :is="dialog.component"></component>
+    <el-dialog
+      v-model="dialog.visible"
+      :title="dialog.title"
+    >
+      <Suspense
+        @pending="dialogPending"
+        @resolve="dialogResolve"
+      >
+        <component :is="dialog.component" />
+        <template #fallback>
+          <el-skeleton
+            :rows="10"
+            animated
+          />
+        </template>
       </Suspense>
     </el-dialog>
   </template>
