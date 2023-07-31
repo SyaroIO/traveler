@@ -8,6 +8,7 @@
     "dev": "nodemon --config nodemon.json",
     "test": "node dist",
     "start": "set NODE_ENV=production&&node dist",
+    "production": "set NODE_ENV=production&&nodemon --config nodemon.json",
     "clean": "rimraf dist",
     "prebuild": "rimraf -g dist/!(frontend)",
     "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
