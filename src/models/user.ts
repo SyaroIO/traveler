@@ -1,16 +1,8 @@
 import type { Filter, Document } from 'mongodb'
 import { collection } from '@/database'
-import logger from '@/log'
 
-const users = collection('users')
-export default async () => {
-    for (const unique of ['id', 'email']) {
-        const result = await users.createIndex({ [unique]: 1 }, { unique: true }).catch((err) => {
-            logger.debug(err)
-        })
-        logger.debug(`create users collection index: ${result}`)
-    }
-}
+const [users, init] = collection('users', ['id', 'email'])
+export default init
 
 export interface User {
     id: string
@@ -40,19 +32,27 @@ const verificationByDoc = async (filter: Filter<Document>) =>
 const authenticateByDoc = async (filter: Filter<Document>) =>
     users.findOne<User>(filter, { projection: { _id: 0, password: 0 } })
 
-export const verificationById = async (id: string, verification: string) => verificationByDoc({ id, verification })
-export const verificationByEmail = async (email: string, verification: string) =>
-    verificationByDoc({ email, verification })
-export const authenticateById = async (id: string, password: string) => authenticateByDoc({ id, password })
-export const authenticateByEmail = async (email: string, password: string) => authenticateByDoc({ email, password })
+export const verificationById = async (id: string, verification: string) =>
+    verificationByDoc({ id, verification })
+export const verificationByEmail = async (
+    email: string,
+    verification: string
+) => verificationByDoc({ email, verification })
+export const authenticateById = async (id: string, password: string) =>
+    authenticateByDoc({ id, password })
+export const authenticateByEmail = async (email: string, password: string) =>
+    authenticateByDoc({ email, password })
 export const verification = verificationByEmail
 export const authenticate = authenticateByEmail
 
 export const findById = async (id: string) => users.findOne({ id })
-export const findMany = async (ids: string[]) => users.find({ id: { $include: ids } }).toArray()
+export const findMany = async (ids: string[]) =>
+    users.find({ id: { $include: ids } }).toArray()
 export const findByEmail = async (email: string) => users.findOne({ email })
 export const findAll = async () => users.find().toArray()
 export const find = findByEmail
 
-export const checkId = async (id: string) => (await users.countDocuments({ id })) === 0
-export const checkEmail = async (email: string) => (await users.countDocuments({ email })) === 0
+export const checkId = async (id: string) =>
+    (await users.countDocuments({ id })) === 0
+export const checkEmail = async (email: string) =>
+    (await users.countDocuments({ email })) === 0

@@ -1,9 +1,9 @@
 import nodemailer from 'nodemailer'
-import config from '@/config'
+import { mail as config } from 'config'
 import logger from '@/log'
 import { isString } from '@/utils/valid'
 
-interface MailConfig {
+export interface MailConfig {
     host: string
     port: number
     secure: boolean
@@ -13,15 +13,14 @@ interface MailConfig {
     }
 }
 const emailRegexp = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
-const mailConfig = config.mail as unknown as MailConfig
-const transporter = nodemailer.createTransport(mailConfig)
+const transporter = nodemailer.createTransport(config)
 
 export const isEmail = (email: string) => isString(email) && emailRegexp.test(email)
 
 export const sendMail = async (mail: nodemailer.SendMailOptions) => {
     if (!isEmail(mail.to as string)) return false
     try {
-        mail.from = mailConfig.auth.user
+        mail.from = config.auth.user
         const info = await transporter.sendMail(mail)
         logger.debug('Mail sent success:', info.messageId)
     } catch (err) {

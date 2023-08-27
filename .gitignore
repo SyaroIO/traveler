@@ -25,3 +25,5 @@ dist-ssr
 
 .env
 private.ec.key
+config.prod.ts
+/geojson

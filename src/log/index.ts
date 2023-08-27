@@ -1,11 +1,11 @@
 import Log4js from 'log4js'
-import config from '@/config'
+import { logger as config } from 'config'
 
-interface LoggerConfig {
+export interface LoggerConfig {
+    /** @default 'info' */
     level?: string
 }
-const loggerConfig = (config.logger as LoggerConfig) ?? {}
-const level = loggerConfig.level ?? 'info'
+const level = config?.level ?? 'info'
 
 Log4js.configure({
     appenders: {
