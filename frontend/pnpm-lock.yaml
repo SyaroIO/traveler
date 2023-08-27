@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@fingerprintjs/fingerprintjs':
+    specifier: ^4.0.1
+    version: 4.0.1
   crypto-js:
     specifier: ^4.1.1
     version: 4.1.1
@@ -14,12 +17,12 @@ dependencies:
   d3-geo:
     specifier: ^3.1.0
     version: 3.1.0
-  default-passive-events:
-    specifier: ^2.0.0
-    version: 2.0.0
   element-plus:
     specifier: ^2.3.8
     version: 2.3.8(vue@3.3.4)
+  js-cookie:
+    specifier: ^3.0.5
+    version: 3.0.5
   log4js:
     specifier: ^6.9.1
     version: 6.9.1
@@ -47,6 +50,9 @@ devDependencies:
     specifier: ^4.1.1
     version: 4.1.1
   '@types/d3-geo':
+    specifier: ^3.0.3
+    version: 3.0.3
+  '@types/js-cookie':
     specifier: ^3.0.3
     version: 3.0.3
   '@vitejs/plugin-vue':
@@ -361,6 +367,12 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
+  /@fingerprintjs/fingerprintjs@4.0.1:
+    resolution: {integrity: sha512-utXfX0ntmU08MxQ1cfKRbri57xb+aqYNIt2UNYcPsT/fQgKhZsnIBGRIhEifMZ7NZDyGLAhctWaytDkC27fibA==}
+    dependencies:
+      tslib: 2.6.2
+    dev: false
+
   /@floating-ui/core@1.4.0:
     resolution: {integrity: sha512-x5Ly1Eiyqt9aR38XzhraoWxgtQtvy3mVChWMZIr49XFyvIhNuqUxZKXBRoI5WiMRaaAZezCauJaEISu3z5y8sg==}
     dependencies:
@@ -457,6 +469,10 @@ packages:
 
   /@types/geojson@7946.0.10:
     resolution: {integrity: sha512-Nmh0K3iWQJzniTuPRcJn5hxXkfB1T1pgB89SBig5PlJQU5yocazeu4jATJlaA0GYFKWMqDdvYemoSnF2pXgLVA==}
+    dev: true
+
+  /@types/js-cookie@3.0.3:
+    resolution: {integrity: sha512-Xe7IImK09HP1sv2M/aI+48a20VX+TdRJucfq4vfRVy6nWN8PYPOEnlMRSgxJAgYQIXJVL8dZ4/ilAM7dWNaOww==}
     dev: true
 
   /@types/json-schema@7.0.12:
@@ -1401,10 +1417,6 @@ packages:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
     dev: true
 
-  /default-passive-events@2.0.0:
-    resolution: {integrity: sha512-eMtt76GpDVngZQ3ocgvRcNCklUMwID1PaNbCNxfpDXuiOXttSh0HzBbda1HU9SIUsDc02vb7g9+3I5tlqe/qMQ==}
-    dev: false
-
   /define-properties@1.2.0:
     resolution: {integrity: sha512-xvqAVKGfT1+UAvPwKTVw/njhdQ8ZhXK4lI0bCIuCMrp2up9nPnaDftrLtmpTazqd1o+UY4zgzU+avtMbDP+ldA==}
     engines: {node: '>= 0.4'}
@@ -2316,6 +2328,11 @@ packages:
     resolution: {integrity: sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=}
     dev: true
 
+  /js-cookie@3.0.5:
+    resolution: {integrity: sha512-cEiJEAEoIbWfCZYKWhVwFuvPX1gETRYPw6LlaTKoxD3s2AkXzkCjnp6h0V77ozyqj0jakteJ4YqDJT830+lVGw==}
+    engines: {node: '>=14'}
+    dev: false
+
   /js-stringify@1.0.2:
     resolution: {integrity: sha512-rtS5ATOo2Q5k1G+DADISilDA6lv79zIiwFd6CcjuIxGKLFm5C+RLImRscVap9k55i+MOZwgliw+NejvkLuGD5g==}
     dev: true
@@ -3056,6 +3073,10 @@ packages:
   /tslib@1.14.1:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
     dev: true
+
+  /tslib@2.6.2:
+    resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
+    dev: false
 
   /tsutils@3.21.0(typescript@4.9.5):
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}

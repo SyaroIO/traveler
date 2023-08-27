@@ -9,7 +9,7 @@ const activeIndex = ref('index')
 const handleSelect = (key: string) => {
   switch (key) {
     case 'index':
-    case 'single': route(key); break;
+    case 'map': route(key); break;
     case 'authenticate': dialog.show(Dialogs.AuthenticateDialog); break;
     case 'register': dialog.show(Dialogs.RegisterDialog); break;
     case 'test': dialog.show(Dialogs.Test); break;
@@ -21,7 +21,6 @@ const handleSelect = (key: string) => {
 <template>
   <el-menu
     :default-active="activeIndex"
-    class="el-menu-demo"
     mode="horizontal"
     @select="handleSelect"
   >
@@ -32,7 +31,7 @@ const handleSelect = (key: string) => {
       <template #title>
         足迹
       </template>
-      <el-menu-item index="single">
+      <el-menu-item index="map">
         个人
       </el-menu-item>
       <el-menu-item index="2-2">

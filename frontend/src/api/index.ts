@@ -21,7 +21,10 @@ export const getApi = async <T>(uri: string): Promise<Result<T>> =>
     }
   }).then((response) => response.json())
 
-export const postApi = async <T>(uri: string, doc?: object): Promise<Result<T>> =>
+export const postApi = async <T>(
+  uri: string,
+  doc?: object
+): Promise<Result<T>> =>
   fetch(base + uri, {
     method: 'POST',
     headers: {
@@ -29,3 +32,43 @@ export const postApi = async <T>(uri: string, doc?: object): Promise<Result<T>> 
     },
     body: JSON.stringify(doc)
   }).then((response) => response.json())
+
+export const sseApi = (
+  uri: string,
+  onmessage: (message: string) => void,
+  onerror: (err: any) => void
+) => {
+  const source = new EventSource(base + uri, {
+    withCredentials: true
+  })
+  source.addEventListener('message', (e) => onmessage(e.data), false)
+  source.addEventListener(
+    'error',
+    (e) => {
+      source.close()
+      onerror(e)
+    },
+    false
+  )
+  return source
+}
+
+export const sseJsonApi = <T>(
+  uri: string,
+  onmessage: (message: T) => void,
+  onerror: () => void
+) => {
+  const source = sseApi(
+    uri,
+    (message) => {
+      try {
+        onmessage(JSON.parse(message) as T)
+      } catch {
+        source.close()
+        onerror()
+      }
+    },
+    onerror
+  )
+  return source
+}

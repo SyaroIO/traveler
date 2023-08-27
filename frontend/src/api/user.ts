@@ -17,9 +17,9 @@ const encryptDocPassword = (doc: { password: string }) => ({ ...doc, password: e
 export const register = async (doc: { id: string; email: string; name: string; password: string }) =>
   postApi<boolean>('/user/register', encryptDocPassword(doc))
 export const authenticate = async (doc: { email: string; password: string }) =>
-  postApi<undefined>('/user/authenticate', encryptDocPassword(doc))
+  postApi<void>('/user/authenticate', encryptDocPassword(doc))
 export const verification = async (doc: { email: string; verification: string }) =>
-  postApi<undefined>('/user/register/verification', doc)
+  postApi<void>('/user/register/verification', doc)
 
 export const checkId = async (id: string) => isId(id) && postApi<boolean>('/user/check/id', { id })
 export const checkEmail = async (email: string) => isEmail(email) && postApi<boolean>('/user/check/email', { email })

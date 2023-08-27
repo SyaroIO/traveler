@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import { app } from '@/app';
+import { setColor } from '@/app';
 
 const props = defineProps({
   h: { type: Number, require: true, default: 0 },
@@ -50,7 +50,7 @@ const preview = computed(() => {
 });
 
 const submit = () => {
-  app.setColor(hue.value, saturation.value, lightness.value);
+  setColor(hue.value, saturation.value, lightness.value);
   $emit('hsl', `${hue.value},${saturation.value}%,${lightness.value}%`);
 }
 

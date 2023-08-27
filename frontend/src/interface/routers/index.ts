@@ -2,12 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const layouts = {
   main: () => import(':/layouts/MainLayout.vue'),
-  clear: () => import(':/layouts/ClearLayout.vue')
+  clear: () => import(':/layouts/ClearLayout.vue'),
+  bmap: () => import(':/layouts/BMapLayout.vue')
 }
 
 const pages = {
   index: () => import(':/pages/IndexPage.vue'),
-  single: () => import(':/pages/SinglePage.vue'),
+  map: () => import(':/components/MapComponent.vue'),
   notfound: () => import(':/pages/NotFoundPage.vue'),
   test: async () => {
     const component = await import(':/pages/NotFoundPage.vue')
@@ -26,11 +27,11 @@ const routes = [
     }
   },
   {
-    path: '/single',
-    name: 'single',
-    component: layouts.clear,
+    path: '/map',
+    name: 'map',
+    component: layouts.bmap,
     props: {
-      component: pages.single
+      component: pages.map
     }
   },
   {
