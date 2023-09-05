@@ -72,7 +72,7 @@ export const needAuth =
     async (ctx, next) => {
         if (!ctx.token.auth) {
             ctx.body = NoAuth
-            return next()
+            return
         }
         return middleware(ctx.token, ctx, next)
     }
@@ -82,7 +82,7 @@ export const needToken =
     async (ctx, next) => {
         if (ctx.token.none) {
             ctx.body = NoToken
-            return next()
+            return
         }
         return middleware(ctx.token, ctx, next)
     }
@@ -94,20 +94,20 @@ declare type QuickMiddlewareWithToken<
 
 export const authDo =
     <Return>(middleware: QuickMiddlewareWithToken<Return>): Middleware =>
-    async (ctx, next) => {
+    async (ctx) => {
         if (!ctx.token.auth) {
             ctx.body = NoAuth
-            return next()
+            return
         }
         ctx.body = await middleware(ctx.token, ctx)
     }
 
 export const tokenDo =
     <Return>(middleware: QuickMiddlewareWithToken<Return>): Middleware =>
-    async (ctx, next) => {
+    async (ctx) => {
         if (ctx.token.none) {
             ctx.body = NoToken
-            return next()
+            return
         }
         ctx.body = await middleware(ctx.token, ctx)
         console.log(ctx.body)
