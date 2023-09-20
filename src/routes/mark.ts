@@ -13,5 +13,8 @@ router
         '/',
         authDo(async (token, ctx) => mark.set(token.id, ctx.request.body))
     )
+    .get('/:id', async (ctx) => {
+        ctx.body = await mark.get(ctx.params.id)
+    })
 
 export default router.routes()

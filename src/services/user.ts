@@ -3,10 +3,11 @@ import { isString } from '@/utils/valid'
 import { isEmail, sendCode } from '@/mail'
 import * as user from '@/models/user'
 
-export const encodePassword = (password: string) => createHmac('sha256', password).update(`pl0m${password}55bd`).digest('hex')
+export const encodePassword = (password: string) =>
+    createHmac('sha256', password).update(`pl0m${password}55bd`).digest('hex')
 
 const idRule = /^[A-Za-z0-9_\-.]{1,16}$/
-const isId = (id: string) => isString(id) && idRule.test(id)
+export const isId = (id: string) => isString(id) && idRule.test(id)
 const L = '01234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const generatedCode = () => {
     let t = (Date.now() % 1000000000) + Math.ceil(Math.random() * 2176782336)
@@ -18,7 +19,17 @@ const generatedCode = () => {
     return code.join('')
 }
 
-export const register = async ({ id, name, email, password }: { id: string; name: string; email: string; password: string }) => {
+export const register = async ({
+    id,
+    name,
+    email,
+    password
+}: {
+    id: string
+    name: string
+    email: string
+    password: string
+}) => {
     if (!isId(id) || !isString(name) || !isEmail(email) || !isString(password))
         return {
             success: false,
@@ -53,7 +64,13 @@ export const register = async ({ id, name, email, password }: { id: string; name
     }
 }
 
-export const verification = async ({ email, verification }: { email: string; verification: string }) => {
+export const verification = async ({
+    email,
+    verification
+}: {
+    email: string
+    verification: string
+}) => {
     if (!isEmail(email) || !isString(verification))
         return {
             success: false,
@@ -74,7 +91,13 @@ export const verification = async ({ email, verification }: { email: string; ver
     }
 }
 
-export const authenticate = async ({ email, password }: { email: string; password: string }) => {
+export const authenticate = async ({
+    email,
+    password
+}: {
+    email: string
+    password: string
+}) => {
     if (!isEmail(email) || !isString(password))
         return {
             success: false,

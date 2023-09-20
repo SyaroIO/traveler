@@ -3,16 +3,21 @@ import type { Middleware } from '@koa/router'
 import * as user from '@/services/user'
 import { createToken } from '@/token'
 import type { AuthToken, FingerprintToken } from '@/token'
+import type { ExtendableContext } from 'koa'
+import sse from '@/utils/sse'
 
 export const router = new Router()
 
-const genCookie = (data: Parameters<typeof createToken>[0]) => {
-    const token = createToken(data)
-    const httpOnly = true
-    const expires = new Date()
-    expires.setFullYear(expires.getFullYear() + 10)
-    return { name: 'token', value: token, opts: { httpOnly, expires } }
-}
+const genCookie = (
+    data: Parameters<typeof createToken>[0]
+): Parameters<ExtendableContext['cookies']['set']> => [
+    'token',
+    createToken(data),
+    {
+        httpOnly: true,
+        expires: new Date(new Date().setFullYear(new Date().getFullYear() + 10))
+    }
+]
 
 router
     .post('/register', async (ctx) => {
@@ -28,16 +33,14 @@ router
         const result = await user.verification(doc)
         ctx.body = result
         if (!result.success) return
-        const { name, value, opts } = genCookie(result.data as object)
-        ctx.cookies.set(name, value, opts)
+        ctx.cookies.set(...genCookie(result.data as object))
     })
     .post('/authenticate', async (ctx) => {
         const doc = ctx.request.body
         const result = await user.authenticate(doc)
         ctx.body = result
         if (!result.success) return
-        const { name, value, opts } = genCookie(result.data as object)
-        ctx.cookies.set(name, value, opts)
+        ctx.cookies.set(...genCookie(result.data as object))
     })
     .post('/check/id', async (ctx) => {
         const doc = ctx.request.body
@@ -110,5 +113,22 @@ export const tokenDo =
             return
         }
         ctx.body = await middleware(ctx.token, ctx)
-        console.log(ctx.body)
+    }
+
+declare type SseMiddlewareWithToken<T = AuthToken | FingerprintToken> = (
+    token: T,
+    ctx: Parameters<Middleware>[0],
+    source: ReturnType<typeof sse>
+) => Promise<void>
+
+export const tokenSse =
+    (middleware: SseMiddlewareWithToken): Middleware =>
+    async (ctx) => {
+        const source = sse(ctx)
+        if (ctx.token.none) {
+            source.write({ type: 'init', data: NoToken })
+            source.close()
+            return
+        }
+        return middleware(ctx.token, ctx, source)
     }

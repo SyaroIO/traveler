@@ -1,7 +1,6 @@
 import Router from '@koa/router'
-import { authDo, tokenDo, needToken } from './user'
+import { authDo, tokenDo, tokenSse } from './user'
 import * as room from '@/services/room'
-import sse from '@/utils/sse'
 import emitter from '@/event'
 import type { RoomEventData } from '@/services/room'
 
@@ -16,23 +15,27 @@ router
         '/',
         authDo(async (token, ctx) => room.create(token.id, ctx.request.body))
     )
+    .delete(
+        '/:id',
+        authDo(async (token, ctx) => room.del(token.id, ctx.params.id))
+    )
     .get(
         '/:id/:password',
-        needToken(async (token, ctx) => {
+        tokenSse(async (token, ctx, source) => {
             const id = ctx.params.id
             const password = ctx.params.password
-            const { write, close, onclose } = sse(ctx)
-
             const data = await room.info(id, password)
-            write({ type: 'init', data })
-            if (!data.success) return close()
-            const listener = (data: RoomEventData) => {
-                if (data.user === token.id) return
-                write({ type: 'update', data: [data.mark, data.before] })
+            source.write({ type: 'init', data })
+            if (!data.success) {
+                source.close()
+                return
             }
+            const listener = (data: RoomEventData) =>
+                source.write({ type: 'update', data: [data.mark, data.before] })
+
             const eventId = `room#${id}`
             emitter.on(eventId, listener)
-            onclose(() => emitter.off(eventId, listener))
+            source.onclose(() => emitter.off(eventId, listener))
         })
     )
     .post(

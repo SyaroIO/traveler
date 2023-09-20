@@ -10,18 +10,27 @@ export const get = async (user: string) => {
     }
 }
 
-export const create = async (user: string, password: string) => {
-    const { success, id } = await room.create(user, password)
+export const create = async (
+    user: string,
+    { name, password }: { password: string; name: string }
+) => {
+    const { success, id } = await room.create(user, password, name)
     if (success) return { success: true, code: 0, data: id }
     return { success: false, code: 1 }
+}
+
+export const del = async (user: string, id: string) => {
+    if (!isOid(id)) return { success: false, code: 1, message: 'Invalid ID' }
+    const ret = await room.del(user, id)
+    if (ret) return { success: true, code: 0 }
+    return { success: false, code: 2, message: 'Room does not exist' }
 }
 
 export const info = async (id: string, password: string) => {
     if (!isOid(id)) return { success: false, code: 1, message: 'Invalid ID' }
     const data = await room.info(id, password)
-    if (!data)
-        return { success: false, code: 2, message: 'Room does not exist' }
-    return { success: true, code: 0, data }
+    if (data) return { success: true, code: 0, data }
+    return { success: false, code: 2, message: 'Room does not exist' }
 }
 
 export interface RoomEventData {

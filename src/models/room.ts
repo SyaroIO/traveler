@@ -10,16 +10,23 @@ export default async () => {
 
 export const get = async (owner: string) =>
     rooms
-        .find({ owner }, { projection: { data: 0 } })
+        .find({ owner })
         .toArray()
-        .then((rooms) => rooms.map(({ _id }) => _id.toHexString()))
+        .then((rooms) =>
+            rooms.map(({ _id, password, name }) => [
+                _id.toHexString(),
+                password,
+                name
+            ])
+        )
 
 export const create = async (
     owner: string,
-    password: string
+    password: string,
+    name: string
 ): Promise<{ success: boolean; id?: string }> =>
     rooms
-        .insertOne({ owner, password })
+        .insertOne({ owner, password, name })
         .then(({ insertedId }) => {
             logger.debug(`create room ${insertedId}`)
             return {
@@ -31,6 +38,11 @@ export const create = async (
             logger.debug(e)
             return { success: false }
         })
+
+export const del = async (owner: string, id: string) =>
+    rooms
+        .deleteOne({ owner, _id: oid(id) })
+        .then(({ acknowledged }) => acknowledged)
 
 export const info = async (id: string, password: string) => {
     const array = await rooms
@@ -62,6 +74,7 @@ export const info = async (id: string, password: string) => {
             {
                 $project: {
                     _id: 0,
+                    name: 1,
                     records: {
                         $arrayToObject: '$records'
                     }
@@ -71,8 +84,7 @@ export const info = async (id: string, password: string) => {
         .toArray()
 
     if (!array || array.length === 0) return null
-    const [{ records }] = array
-    return records
+    return array[0]
 }
 
 export const mark = async (

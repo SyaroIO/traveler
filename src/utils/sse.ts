@@ -8,11 +8,8 @@ export const sse = (ctx: Context) => {
     ctx.request.socket.setTimeout(0)
     ctx.req.socket.setNoDelay(true)
     ctx.req.socket.setKeepAlive(true)
-    ctx.set({
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive'
-    })
+    ctx.set('Content-Type', 'text/event-stream')
+    ctx.set('Cache-Control', 'no-store')
     const stream = new PassThrough()
     ctx.body = stream
     ctx.status = 200
