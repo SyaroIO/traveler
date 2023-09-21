@@ -44,7 +44,7 @@ export const del = async (owner: string, id: string) =>
         .deleteOne({ owner, _id: oid(id) })
         .then(({ acknowledged }) => acknowledged)
 
-export const info = async (id: string, password: string) => {
+export const info = async (user: string, id: string, password: string) => {
     const array = await rooms
         .aggregate([
             { $match: { _id: oid(id), password } },
@@ -56,15 +56,35 @@ export const info = async (id: string, password: string) => {
                     pipeline: [
                         {
                             $group: {
-                                _id: '$mark',
-                                count: { $sum: 1 }
+                                _id: {
+                                    k: { $toString: '$mark' },
+                                    me: {
+                                        $eq: ['$user', user]
+                                    }
+                                },
+                                v: { $sum: 1 }
+                            }
+                        },
+                        {
+                            $group: {
+                                _id: {
+                                    me: '$_id.me'
+                                },
+                                records: {
+                                    $addToSet: {
+                                        k: '$_id.k',
+                                        v: '$v'
+                                    }
+                                }
                             }
                         },
                         {
                             $project: {
                                 _id: 0,
-                                k: { $toString: '$_id' },
-                                v: '$count'
+                                me: '$_id.me',
+                                records: {
+                                    $arrayToObject: '$records'
+                                }
                             }
                         }
                     ],
@@ -75,9 +95,7 @@ export const info = async (id: string, password: string) => {
                 $project: {
                     _id: 0,
                     name: 1,
-                    records: {
-                        $arrayToObject: '$records'
-                    }
+                    records: 1
                 }
             }
         ])

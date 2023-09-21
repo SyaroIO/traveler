@@ -12,10 +12,12 @@ export interface MailConfig {
         pass: string
     }
 }
-const emailRegexp = /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+).[A-Za-z0-9]+$/
+const emailRegexp =
+    /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+)\.[A-Za-z0-9]+$/
 const transporter = nodemailer.createTransport(config)
 
-export const isEmail = (email: string) => isString(email) && emailRegexp.test(email)
+export const isEmail = (email: string) =>
+    isString(email) && emailRegexp.test(email)
 
 export const sendMail = async (mail: nodemailer.SendMailOptions) => {
     if (!isEmail(mail.to as string)) return false

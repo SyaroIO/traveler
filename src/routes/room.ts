@@ -24,7 +24,7 @@ router
         tokenSse(async (token, ctx, source) => {
             const id = ctx.params.id
             const password = ctx.params.password
-            const data = await room.info(id, password)
+            const data = await room.info(token.id, id, password)
             source.write({ type: 'init', data })
             if (!data.success) {
                 source.close()

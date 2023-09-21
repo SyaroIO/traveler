@@ -26,9 +26,9 @@ export const del = async (user: string, id: string) => {
     return { success: false, code: 2, message: 'Room does not exist' }
 }
 
-export const info = async (id: string, password: string) => {
+export const info = async (user: string, id: string, password: string) => {
     if (!isOid(id)) return { success: false, code: 1, message: 'Invalid ID' }
-    const data = await room.info(id, password)
+    const data = await room.info(user, id, password)
     if (data) return { success: true, code: 0, data }
     return { success: false, code: 2, message: 'Room does not exist' }
 }
