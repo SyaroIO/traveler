@@ -9,7 +9,8 @@ const activeIndex = ref('index')
 const handleSelect = (key: string) => {
   switch (key) {
     case 'index':
-    case 'map': route(key); break;
+    case 'footprint/personal': route(key); break;
+    case 'footprint/group': route(key); break;
     case 'authenticate': dialog.show(Dialogs.AuthenticateDialog); break;
     case 'register': dialog.show(Dialogs.RegisterDialog); break;
     case 'test': dialog.show(Dialogs.Test); break;
@@ -31,10 +32,10 @@ const handleSelect = (key: string) => {
       <template #title>
         足迹
       </template>
-      <el-menu-item index="map">
+      <el-menu-item index="footprint/personal">
         个人
       </el-menu-item>
-      <el-menu-item index="2-2">
+      <el-menu-item index="footprint/group">
         群体
       </el-menu-item>
       <el-menu-item index="2-3">

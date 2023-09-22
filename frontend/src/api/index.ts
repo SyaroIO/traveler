@@ -1,3 +1,4 @@
+import { hookResult } from './hook'
 const base = '/api'
 export interface BaseResult {
   success: boolean
@@ -18,8 +19,9 @@ export const getApi = async <T>(uri: string): Promise<Result<T>> =>
     method: 'GET',
     headers: {
       'Content-Type': 'application/json'
-    }
-  }).then((response) => response.json())
+    },
+    credentials: 'include'
+  }).then((response) => hookResult(response.json()))
 
 export const postApi = async <T>(
   uri: string,
@@ -30,13 +32,23 @@ export const postApi = async <T>(
     headers: {
       'Content-Type': 'application/json'
     },
+    credentials: 'include',
     body: JSON.stringify(doc)
-  }).then((response) => response.json())
+  }).then((response) => hookResult(response.json()))
+
+export const deleteApi = async (uri: string): Promise<Result<void>> =>
+  fetch(base + uri, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include'
+  }).then((response) => hookResult(response.json()))
 
 export const sseApi = (
   uri: string,
   onmessage: (message: string) => void,
-  onerror: (err: any) => void
+  onerror: (err: Event) => void
 ) => {
   const source = new EventSource(base + uri, {
     withCredentials: true

@@ -14,17 +14,37 @@ const form = reactive({
   repeat: ''
 })
 
+const timeout = (timeout: number) => {
+  let cancle: (() => void) | null = null;
+  return {
+    cancle: () => cancle?.(),
+    promise: new Promise((reslove, reject) => {
+      const h = setTimeout(reslove, timeout);
+      cancle = () => {
+        clearTimeout(h);
+        reject(new Error('user cancle'));
+      }
+    })
+  };
+}
+
+let last_id: (() => void) | null = null;
+let last_email: (() => void) | null = null;
 const rules = reactive<FormRules<typeof form>>({
   id: {
     required: true,
     validator: asyncValidator(async (value) => {
+      last_id?.()
+      const { promise, cancle } = timeout(800);
+      last_id = cancle;
+      await promise;
       const result = await checkId(value)
       if (!result) throw new Error('ID 只允许包含字母、数字、下划线、短横线、点号，且长度为 1-16 位')
       const { success, message, data } = result
       if (!success) throw message
       if (!data) throw new Error('ID被占用')
     }),
-    trigger: 'blur'
+    trigger: ['change', 'blur']
   },
   name: {
     required: true,
@@ -35,31 +55,35 @@ const rules = reactive<FormRules<typeof form>>({
   email: {
     required: true,
     validator: asyncValidator(async (value: string) => {
+      last_email?.()
+      const { promise, cancle } = timeout(800);
+      last_email = cancle;
+      await promise;
       const result = await checkEmail(value)
       if (!result) throw new Error('错误的邮箱地址')
       const { success, message, data } = result
       if (!success) throw message
       if (!data) throw new Error('邮箱地址已被占用')
     }),
-    trigger: 'blur'
+    trigger: ['change', 'blur']
   },
   password: {
     required: true,
     validator: (_, value) => {
-      if (value === '') return new Error('Please input the password')
+      if (value === '') return new Error('密码不能为空')
       if (form.repeat !== '' && !!formRef.value) formRef.value.validateField('repeat', () => null)
       return true
     },
-    trigger: 'blur'
+    trigger: ['blur', 'change']
   },
   repeat: {
     required: true,
     validator: (_, value) => {
-      if (value === '') return new Error('Please input the password again')
-      if (value !== form.password) return new Error("Two inputs don't match!")
+      if (value === '') return new Error('密码不能为空')
+      if (value !== form.password) return new Error("与上面输入的密码不一致")
       return true
     },
-    trigger: 'blur'
+    trigger: ['blur', 'change']
   }
 })
 

@@ -1,58 +1,60 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-const layouts = {
-  main: () => import(':/layouts/MainLayout.vue'),
-  clear: () => import(':/layouts/ClearLayout.vue'),
-  bmap: () => import(':/layouts/BMapLayout.vue')
-}
-
-const pages = {
-  index: () => import(':/pages/IndexPage.vue'),
-  map: () => import(':/components/MapComponent.vue'),
-  notfound: () => import(':/pages/NotFoundPage.vue'),
-  test: async () => {
-    const component = await import(':/pages/NotFoundPage.vue')
-    await new Promise((reslove) => setTimeout(reslove, 1000))
-    return component
-  }
-}
-
 const routes = [
   {
     path: '/',
-    name: 'index',
-    component: layouts.main,
-    props: {
-      component: pages.index
-    }
-  },
-  {
-    path: '/map',
-    name: 'map',
-    component: layouts.bmap,
-    props: {
-      component: pages.map
-    }
-  },
-  {
-    path: '/test',
-    name: 'test',
-    component: layouts.main,
-    props: {
-      component: pages.test
-    }
-  },
-  {
-    path: '/404',
-    name: '404',
-    component: layouts.main,
-    props: {
-      component: pages.notfound
-    }
-  },
-  {
-    path: '/:catchAll(.*)',
-    redirect: '/404'
+    component: () => import(':/layouts/MainLayout.vue'),
+    children: [
+      {
+        path: '/',
+        name: 'index',
+        component: () => import(':/pages/IndexPage.vue')
+      },
+      {
+        path: '/404',
+        name: '404',
+        component: () => import(':/pages/NotFoundPage.vue')
+      },
+      {
+        path: '/:catchAll(.*)',
+        redirect: '/404'
+      },
+      {
+        path: '/footprint',
+        redirect: '/footprint/personal'
+      },
+      {
+        path: '/footprint/personal',
+        name: 'footprint/personal',
+        component: () => import(':/pages/FootprintPersonal.vue')
+      },
+      {
+        path: '/footprint/group',
+        name: 'footprint/group',
+        component: () => import(':/pages/FootprintGroup.vue')
+      },
+      {
+        path: '/footprint/group/:id/:password',
+        name: 'footprint/room',
+        component: () => import(':/pages/FootprintRoom.vue'),
+        props: true
+      },
+      {
+        path: '/footprint/random',
+        name: 'footprint/random',
+        component: () => import(':/pages/FootprintRandom.vue'),
+        props: true
+      },
+      {
+        path: '/test',
+        name: 'test',
+        component: async () => {
+          const component = await import(':/pages/NotFoundPage.vue')
+          await new Promise((reslove) => setTimeout(reslove, 1000))
+          return component
+        }
+      }
+    ]
   }
 ]
 
@@ -60,4 +62,10 @@ export const router = createRouter({
   routes,
   history: createWebHistory()
 })
-export const route = (name: string) => router.push({ name })
+
+export interface RouterParams {
+  [key: string]: string | number
+}
+
+export const route = (name: string, params?: RouterParams) =>
+  router.push({ name, params })

@@ -1,184 +1,121 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import { setColor } from '@/app';
+import { computed } from 'vue';
 
-const props = defineProps({
-  h: { type: Number, require: true, default: 0 },
-  s: { type: Number, require: true, default: 0 },
-  l: { type: Number, require: true, default: 0 },
-});
-
-const $emit = defineEmits(['hsl']);
-
-const hue = ref(props.h);
-const saturation = ref(props.s);
-const lightness = ref(props.l);
-
-const hBar = computed(() => {
-  const s = saturation.value;
-  const l = lightness.value;
-  const range = new Array(37).fill(0)
-    .map((_, i) => `hsl(${i * 10},${s}%,${l}%)`)
-    .join(',');
-  return `background: linear-gradient(to right, ${range});`;
-});
-
-const sBar = computed(() => {
-  const h = hue.value;
-  const l = lightness.value;
-  const range = new Array(11).fill(0)
-    .map((_, i) => `hsl(${h},${i * 10}%,${l}%)`)
-    .join(',');
-  return `background: linear-gradient(to right, ${range});`;
-});
-
-const lBar = computed(() => {
-  const h = hue.value;
-  const s = saturation.value;
-  const range = new Array(11).fill(0)
-    .map((_, i) => `hsl(${h},${s}%,${i * 10}%)`)
-    .join(',');
-  return `background: linear-gradient(to right, ${range});`;
-});
-
-const preview = computed(() => {
-  const h = hue.value;
-  const s = saturation.value;
-  const l = lightness.value;
-  return [1, 1, 0.8, 0.6, 0.4, 0.2]
-    .map(v => `background: hsla(${h},${s}%,${l}%,${v});`);
-});
-
-const submit = () => {
-  setColor(hue.value, saturation.value, lightness.value);
-  $emit('hsl', `${hue.value},${saturation.value}%,${lightness.value}%`);
+interface HSL {
+  h: number,
+  s: number,
+  l: number,
 }
+const props = defineProps<{
+  modelValue: HSL
+}>();
+const $emit = defineEmits(['update:modelValue']);
+
+const hsl = (key: 'h' | 's' | 'l', value: number | string) => ({ ...props.modelValue, [key]: Number(value) } as HSL)
+const emit = (key: Parameters<typeof hsl>[0], e: Event) => $emit('update:modelValue', hsl(key, (e.target as HTMLInputElement).value))
+const bar = (key: 'h' | 's' | 'l', sp: number) => {
+  const range = new Array(sp).fill(0).map((_, i) => {
+    const { h, s, l } = hsl(key, i * 10)
+    return `hsl(${h},${s}%,${l}%)`
+  })
+  console.log(key, range)
+  return `background: linear-gradient(to right, ${range});`
+}
+
+const preview = computed(() => [1, 1, 0.8, 0.6, 0.4, 0.2]
+  .map(v => `background: hsla(${props.modelValue.h},${props.modelValue.s}%,${props.modelValue.l}%,${v});`)
+);
 
 </script>
 
 <template>
   <div class="hsl">
-    <div class="preview">
-      <div :style="preview[0]" />
-      <div :style="preview[1]" />
-      <div :style="preview[2]" />
-      <div :style="preview[3]" />
-      <div :style="preview[4]" />
-      <div :style="preview[5]" />
-    </div>
+    <ul class="preview">
+      <li
+        v-for="(style, i) in preview"
+        :key="i"
+        :style="style"
+      />
+    </ul>
     <ul class="ranges">
       <li class="range h">
-        <div :style="hBar" />
+        <div :style="bar('h', 37)" />
         <input
-          v-model="hue"
+          :value="modelValue.h"
           type="range"
           min="0"
           max="360"
+          @input="e => emit('h', e)"
         >
       </li>
       <li class="range s">
-        <div :style="sBar" />
+        <div :style="bar('s', 11)" />
         <input
-          v-model="saturation"
+          :value="modelValue.s"
           type="range"
           min="0"
-          max="360"
+          max="100"
+          @input="e => emit('s', e)"
         >
       </li>
       <li class="range l">
-        <div :style="lBar" />
+        <div :style="bar('l', 11)" />
         <input
-          v-model="lightness"
+          :value="modelValue.l"
           type="range"
           min="0"
-          max="360"
+          max="100"
+          @input="e => emit('l', e)"
         >
       </li>
     </ul>
-    <button
-      class="submit"
-      @click="submit"
-    >
-      OK
-    </button>
   </div>
 </template>
 
 <style lang="scss" scoped>
 div.hsl {
-  display: flex;
+  display: grid;
   height: 60px;
   width: 300px;
+  grid-template-columns: 60px auto;
 
   >.preview {
+    display: grid;
+    grid-template-columns: repeat(5, 20%);
+    grid-template-rows: 80% 20%;
+    gap: 0;
     position: relative;
-    padding: 30px;
+    padding: 0;
     box-shadow: 0 0 4px #0004;
 
-    >* {
-      position: absolute;
-      top: 80%;
-      height: 20%;
-      width: 20%;
-
-      &:nth-child(1) {
-        top: 0;
-        left: 0;
-        height: 80%;
-        width: 100%;
-      }
-
-      &:nth-child(2) {
-        left: 0;
-      }
-
-      &:nth-child(3) {
-        left: 20%;
-      }
-
-      &:nth-child(4) {
-        left: 40%;
-      }
-
-      &:nth-child(5) {
-        left: 60%;
-      }
-
-      &:nth-child(6) {
-        left: 80%;
-      }
+    >:first-child {
+      grid-column: 1 / -1;
     }
   }
 
   >.ranges {
     margin-left: 10px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
 
     >.range {
       position: relative;
-      height: 100%;
+      display: flex;
 
       >div {
-        position: absolute;
-        top: 50%;
         width: 100%;
-        transform: translateY(-50%);
-        height: 8px;
+        margin: 6px 0;
         border-radius: 4px;
         box-shadow: 0 0 4px #0004;
       }
 
-      >input[type=range] {
+      >input {
         display: block;
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
         left: 0;
         right: 0;
-        width: 100%;
-        z-index: 1;
         appearance: none;
         background: transparent;
 
