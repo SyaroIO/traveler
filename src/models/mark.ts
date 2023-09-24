@@ -1,5 +1,4 @@
 import { collection } from '@/database'
-import logger from '@/log'
 
 const [marks, init] = collection('marks', ['id'])
 export default init
@@ -10,11 +9,18 @@ export const get = async (id: string) =>
         .then((result) => result?.v ?? [])
         .catch(() => [])
 
-export const set = async (id: string, v: number[][]) =>
-    marks
-        .updateOne({ id }, { $set: { v } }, { upsert: true })
+export const set = async (id: string, v: number[][]) => {
+    const last = await marks.findOne({ id }).then((ret) => ret?.v ?? [])
+    const map = new Map<number, number>(last)
+    for (const [index, value] of v)
+        if (value == 0) map.delete(index)
+        else map.set(index, value)
+    return marks
+        .updateOne(
+            { id },
+            { $set: { v: Array.from(map.entries()) } },
+            { upsert: true }
+        )
         .then(() => true)
-        .catch((e) => {
-            logger.debug(e)
-            return false
-        })
+        .catch(() => false)
+}
