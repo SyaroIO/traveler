@@ -123,6 +123,9 @@ const submit = async () => {
         type="text"
         placeholder="请输入ID"
         autocomplete="username"
+        minlength="1"
+        maxlength="16"
+        show-word-limit
       />
     </el-form-item>
     <el-form-item
@@ -134,6 +137,9 @@ const submit = async () => {
         type="text"
         placeholder="请输入昵称"
         autocomplete="nickname"
+        minlength="1"
+        maxlength="50"
+        show-word-limit
       />
     </el-form-item>
     <el-form-item
