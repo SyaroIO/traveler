@@ -36,7 +36,7 @@ export const join = <M = RoomMessage>(
   return () => sse.close()
 }
 
-export const mark = async (id: string, password: string, mark: string) =>
+export const mark = async (id: string, password: string, mark: number) =>
   postApi<void>(`${base}/${id}/${password}`, { mark })
 
 export type Room = [string, string, string]

@@ -1,150 +1,126 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import geojson from '@/assets/geojson/china.json'
 import { get, set } from '@/api/mark'
-import type { MarkData } from '@/api/mark'
+import { size, info } from '@/utils/geo'
+import { Check } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import MapComponent from ':/components/MapComponent.vue'
 
-interface Row {
-  province: string
-  district: string
-  index: number
-  value: number
-}
-const tableData = ref<Row[]>([]);
-
-let values: Map<number, number> | null = null
+const values = ref<number[]>(new Array(size).fill(0))
+const last = new Array(size).fill(0)
 get().then(({ success, data }) => {
   if (!success) return;
-  values = new Map(data);
-  geojson.forEach(({ province, district }, index) => tableData.value.push({
-    province,
-    district,
-    index,
-    value: values?.get(index) ?? 0
-  }))
+  for (const [index, value] of data)
+    last[index] = values.value[index] = value
 })
 
-const tableRowClassName = ({ row: { value } }: { row: Row }) => 'l' + value
-const lv = (index: number, value: number) => {
-  tableData.value[index].value = value
+const dialog = ref<{
+  display: boolean,
+  province: string,
+  district: string,
+  value: number
+  index: number,
+}>({ display: false, province: '', district: '', index: -1, value: 0 })
+const click = (index: number) => {
+  const districtData = info(index)
+  if (!districtData) return;
+  dialog.value.index = index
+  dialog.value.province = districtData.province
+  dialog.value.district = districtData.name
+  dialog.value.value = values.value[index]
+  dialog.value.display = true
 }
-const level = [
-  { value: 0, button: '清除', state: '无' },
-  { value: 1, button: '想去', state: '想去' },
-  { value: 2, button: '路过', state: '路过' },
-  { value: 3, button: '去过', state: '去过' },
-  { value: 4, button: '住过', state: '住过' },
-  { value: 5, button: '家乡', state: '家乡' }
+const radios = [
+  { value: 0, text: '清除' },
+  { value: 1, text: '想去' },
+  { value: 2, text: '路过' },
+  { value: 3, text: '去过' },
+  { value: 4, text: '住过' },
+  { value: 5, text: '家乡' }
 ];
-
-const submit = async () => {
-  const data: MarkData = [];
-  for (const { index, value } of tableData.value) {
-    if (value === 0) continue;
-    data.push([index, value]);
-  }
-  if (data.length === 0) return;
-  const filtered = data.filter(([index]) => !values?.has(index))
-  if (filtered.length === 0) return;
-  await set(data)
+const changed = ref(new Map<number, number>());
+const change = (value: string | number | boolean) => {
+  value = Number(value);
+  const index = dialog.value.index
+  values.value[index] = value
+  if (last[index] == value)
+    changed.value.delete(index)
+  else
+    changed.value.set(index, value)
 }
-
+const save = async () => {
+  if (changed.value.size === 0)
+    return ElMessage('没有任何修改')
+  const { success, message } = await set(Array.from(changed.value.entries()))
+  if (success) ElMessage.success('保存成功')
+  else ElMessage.error('保存失败: ' + message)
+}
 </script>
 
 <template>
-  <el-row justify="center">
-    <el-table
-      :data="tableData"
-      style="max-width: 550px"
-      :row-class-name="tableRowClassName"
+  <MapComponent
+    :max="5"
+    :values="values"
+    @district-click="click"
+  />
+  <div class="toolbar">
+    <el-tooltip
+      content="保存"
+      placement="right"
     >
-      <el-table-column
-        prop="index"
-        label="Index"
+      <el-button
+        circle
+        type="primary"
+        size="large"
+        :icon="Check"
+        @click="save"
       />
-      <el-table-column
-        prop="province"
-        label="Province"
-      />
-      <el-table-column
-        prop="district"
-        label="District"
-      />
-      <el-table-column
-        label="Value"
+    </el-tooltip>
+  </div>
+  <el-dialog
+    v-model="dialog.display"
+    :title="`${dialog.province}${dialog.district}`"
+    width="300"
+  >
+    <el-radio-group
+      v-model="dialog.value"
+      @change="change"
+    >
+      <el-row
+        justify="center"
+        align="middle"
       >
-        <template #default="scoop">
-          {{ level[scoop.row.value].state }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        widht="180"
-        align="right"
-      >
-        <template #header>
-          <el-button
-            type="success"
-            @click="submit"
+        <el-col
+          class=""
+          v-for="{ text, value } of radios"
+          :key="value"
+          :span="8"
+        >
+          <el-row
+            justify="center"
+            align="middle"
           >
-            Submit
-          </el-button>
-        </template>
-        <template #default="scoop">
-          <el-popover
-            placement="left"
-            trigger="hover"
-          >
-            <template #reference>
-              <el-button
-                type="primary"
-                size="small"
-              >
-                Operations
-              </el-button>
-            </template>
-            <el-col
-              v-for="{ button, value } of level"
-              :key="button"
-              :row="24"
+            <el-radio
+              :label="value"
+              border
             >
-              <el-button
-                text
-                size="small"
-                style="width:100%"
-                @click="lv(scoop.$index, value)"
-              >
-                {{ button }}
-              </el-button>
-            </el-col>
-          </el-popover>
-        </template>
-      </el-table-column>
-    </el-table>
-  </el-row>
+              {{ text }}
+            </el-radio>
+          </el-row>
+        </el-col>
+      </el-row>
+    </el-radio-group>
+  </el-dialog>
 </template>
 
-<style lang="scss">
-.el-table .l0 {
-  --el-table-tr-bg-color: hsla(220, 100%, 50%, 0);
+<style lang="scss" scoped>
+.toolbar {
+  position: fixed;
+  top: 60px;
+  left: 10px;
 }
 
-.el-table .l1 {
-  --el-table-tr-bg-color: hsla(220, 100%, 50%, 0.2);
-}
-
-.el-table .l2 {
-  --el-table-tr-bg-color: hsla(220, 100%, 50%, 0.4);
-}
-
-.el-table .l3 {
-  --el-table-tr-bg-color: hsla(220, 100%, 50%, 0.6);
-}
-
-.el-table .l4 {
-  --el-table-tr-bg-color: hsla(220, 100%, 50%, 0.8);
-}
-
-.el-table .l5 {
-  --el-table-tr-bg-color: hsla(220, 100%, 50%, 1);
+.el-col {
+  margin-bottom: 8px;
 }
 </style>

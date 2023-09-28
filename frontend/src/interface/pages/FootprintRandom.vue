@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import MapComponent from ':/components/MapComponent.vue'
 import { get, set } from '@/api/random'
-import { indexs } from '@/utils/geo'
-import { View } from '@element-plus/icons-vue'
-const values = ref<number[]>(new Array(indexs.length).fill(0))
+import { size } from '@/utils/geo'
+import { Location } from '@element-plus/icons-vue'
+import MapComponent from ':/components/MapComponent.vue'
+const values = ref<number[]>(new Array(size).fill(0))
 const max = ref(0)
 const mine = ref({ m: false, v: 0 })
 
@@ -38,7 +38,7 @@ onUnmounted(() => close?.());
         circle
         type="primary"
         size="large"
-        :icon="View"
+        :icon="Location"
         @click="set"
       />
     </el-tooltip>

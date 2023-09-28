@@ -18,12 +18,11 @@ const bar = (key: 'h' | 's' | 'l', sp: number) => {
     const { h, s, l } = hsl(key, i * 10)
     return `hsl(${h},${s}%,${l}%)`
   })
-  console.log(key, range)
   return `background: linear-gradient(to right, ${range});`
 }
 
 const preview = computed(() => [1, 1, 0.8, 0.6, 0.4, 0.2]
-  .map(v => `background: hsla(${props.modelValue.h},${props.modelValue.s}%,${props.modelValue.l}%,${v});`)
+  .map(v => `background: hsl(${props.modelValue.h},${props.modelValue.s}%,${props.modelValue.l * v}%);`)
 );
 
 </script>
