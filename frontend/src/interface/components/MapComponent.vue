@@ -218,7 +218,7 @@ draw()
     >
       {{ hoverTips?.name }}
     </div>
-    <div class="toolbar">
+    <teleport to='#fabbl'>
       <el-row class="btn">
         <el-tooltip
           content="复原位置"
@@ -262,9 +262,9 @@ draw()
         </el-tooltip>
       </el-row>
       <el-row>
-        <HSLComponent v-model="hsl" />
+        <HSLComponent class="hsl-tool" v-model="hsl" />
       </el-row>
-    </div>
+    </teleport>
   </div>
 </template>
 
@@ -281,15 +281,9 @@ draw()
   overflow: hidden;
 }
 
-.toolbar {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-
-  .btn {
-    margin: 10px;
-  }
-
+.hsl-tool {
+  margin-left: -10px;
+  margin-bottom: -10px;
 }
 
 svg.map {

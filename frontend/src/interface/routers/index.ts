@@ -46,6 +46,12 @@ const routes = [
         props: true
       },
       {
+        path: '/footprint/share/:id',
+        name: 'footprint/share',
+        component: () => import(':/pages/FootprintShare.vue'),
+        props: true
+      },
+      {
         path: '/test',
         name: 'test',
         component: async () => {

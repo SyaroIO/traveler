@@ -9,9 +9,4 @@ import ':/styles/style.scss'
 import App from './App.vue'
 
 export const app = create(App).use(ElementPlus).use(router).use(createPinia())
-export const mount = (id: string) => {
-  const element = document.createElement('div')
-  element.id = id
-  document.body.appendChild(element)
-  return app.mount(element)
-}
+export const mount = () => app.mount('#app')

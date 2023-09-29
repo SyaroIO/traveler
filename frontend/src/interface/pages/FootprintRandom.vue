@@ -29,26 +29,20 @@ onUnmounted(() => close?.());
     :values="values"
     :max="max"
   />
-  <div class="toolbar">
-    <el-tooltip
-      content="踩一下"
-      placement="right"
-    >
-      <el-button
-        circle
-        type="primary"
-        size="large"
-        :icon="Location"
-        @click="set"
-      />
-    </el-tooltip>
-  </div>
+  <teleport to="#fabtl">
+    <el-row>
+      <el-tooltip
+        content="踩一下"
+        placement="right"
+      >
+        <el-button
+          circle
+          type="primary"
+          size="large"
+          :icon="Location"
+          @click="set"
+        />
+      </el-tooltip>
+    </el-row>
+  </teleport>
 </template>
-
-<style lang="scss" scoped>
-.toolbar {
-  position: fixed;
-  top: 60px;
-  left: 10px;
-}
-</style>

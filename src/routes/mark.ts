@@ -13,8 +13,17 @@ router
         '/',
         authDo(async (token, ctx) => mark.set(token.id, ctx.request.body))
     )
-    .get('/:id', async (ctx) => {
-        ctx.body = await mark.get(ctx.params.id)
-    })
+    .post(
+        '/share',
+        authDo(async (token) => mark.share(token.id))
+    )
+    .delete(
+        '/share',
+        authDo(async (token) => mark.unshare(token.id))
+    )
+    .get(
+        '/share/:id',
+        async (ctx) => (ctx.body = await mark.getShare(ctx.params.id))
+    )
 
 export default router.routes()

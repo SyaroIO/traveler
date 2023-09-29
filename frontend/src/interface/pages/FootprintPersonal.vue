@@ -1,16 +1,23 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { get, set } from '@/api/mark'
+import * as mark from '@/api/mark'
 import { size, info } from '@/utils/geo'
-import { Check } from '@element-plus/icons-vue'
+import { Check, Share, Close } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import MapComponent from ':/components/MapComponent.vue'
 
 const values = ref<number[]>(new Array(size).fill(0))
+const share = ref({
+  display: false,
+  link: '',
+  share: false
+})
 const last = new Array(size).fill(0)
-get().then(({ success, data }) => {
+mark.get().then(({ success, data }) => {
   if (!success) return;
-  for (const [index, value] of data)
+  share.value.share = data.share
+  share.value.link = `${location.origin}/footprint/share/${data.id}`
+  for (const [index, value] of data.marks)
     last[index] = values.value[index] = value
 })
 
@@ -51,9 +58,21 @@ const change = (value: string | number | boolean) => {
 const save = async () => {
   if (changed.value.size === 0)
     return ElMessage('没有任何修改')
-  const { success, message } = await set(Array.from(changed.value.entries()))
+  const { success, message } = await mark.set(Array.from(changed.value.entries()))
   if (success) ElMessage.success('保存成功')
   else ElMessage.error('保存失败: ' + message)
+}
+const openShare = async () => {
+  const { success } = await mark.share()
+  if (!success) return ElMessage.error('开启失败')
+  share.value.share = true
+  return ElMessage.success('开启成功')
+}
+const closeShare = async () => {
+  const { success } = await mark.unshare()
+  if (!success) return ElMessage.error('关闭失败')
+  share.value.share = false
+  return ElMessage.success('关闭成功')
 }
 </script>
 
@@ -63,20 +82,120 @@ const save = async () => {
     :values="values"
     @district-click="click"
   />
-  <div class="toolbar">
-    <el-tooltip
-      content="保存"
-      placement="right"
+  <teleport to="#fabtl">
+    <el-row>
+      <el-tooltip
+        content="保存"
+        placement="right"
+      >
+        <el-button
+          circle
+          type="primary"
+          size="large"
+          :icon="Check"
+          @click="save"
+        />
+      </el-tooltip>
+    </el-row>
+    <el-row>
+      <el-tooltip
+        content="分享"
+        placement="right"
+      >
+        <el-button
+          circle
+          type="primary"
+          size="large"
+          :icon="Share"
+          @click="share.display = true"
+        />
+      </el-tooltip>
+    </el-row>
+  </teleport>
+  <el-dialog
+    v-model="share.display"
+    title="分享"
+    width="400"
+  >
+    <el-row
+      justify="center"
+      align="middle"
+      v-if="share.share"
     >
-      <el-button
-        circle
-        type="primary"
-        size="large"
-        :icon="Check"
-        @click="save"
-      />
-    </el-tooltip>
-  </div>
+      <el-col class="btn-col">
+        <el-row
+          justify="center"
+          align="middle"
+        >
+          <el-tooltip
+            content="取消分享"
+            placement="right"
+          >
+            <el-button
+              circle
+              type="danger"
+              size="large"
+              :icon="Close"
+              @click="closeShare"
+            />
+          </el-tooltip>
+        </el-row>
+      </el-col>
+      <el-col>
+        <el-row
+          justify="center"
+          align="middle"
+        >
+          <el-text>
+            你的足迹分享链接是:
+          </el-text>
+        </el-row>
+        <el-row
+          justify="center"
+          align="middle"
+        >
+          <el-link :href="share.link">
+            {{ share.link }}
+          </el-link>
+        </el-row>
+      </el-col>
+    </el-row>
+    <el-row
+      justify="center"
+      align="middle"
+      v-else
+    >
+      <el-col class="btn-col">
+        <el-row
+          justify="center"
+          align="middle"
+        >
+          <el-tooltip
+            content="分享"
+            placement="right"
+          >
+            <el-button
+              circle
+              type="success"
+              size="large"
+              :icon="Check"
+              @click="openShare"
+            />
+          </el-tooltip>
+        </el-row>
+      </el-col>
+      <el-col>
+        <el-row
+          justify="center"
+          align="middle"
+        >
+          <el-text>
+            你还没有开启分享足迹
+          </el-text>
+        </el-row>
+      </el-col>
+    </el-row>
+  </el-dialog>
   <el-dialog
     v-model="dialog.display"
     :title="`${dialog.province}${dialog.district}`"
@@ -91,7 +210,7 @@ const save = async () => {
         align="middle"
       >
         <el-col
-          class=""
+          class="radio"
           v-for="{ text, value } of radios"
           :key="value"
           :span="8"
@@ -114,13 +233,11 @@ const save = async () => {
 </template>
 
 <style lang="scss" scoped>
-.toolbar {
-  position: fixed;
-  top: 60px;
-  left: 10px;
+.radio {
+  margin-bottom: 8px;
 }
 
-.el-col {
-  margin-bottom: 8px;
+.btn-col {
+  margin-bottom: 30px;
 }
 </style>

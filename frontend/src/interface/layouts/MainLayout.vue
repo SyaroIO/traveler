@@ -5,16 +5,8 @@ import FloatingActionButtons from './components/FloatingActionButtons.vue'
 <template>
   <el-container style="min-height: 100vh;">
     <el-main>
-      <router-view />
       <FloatingActionButtons />
+      <router-view />
     </el-main>
   </el-container>
 </template>
-
-<style lang="scss" scoped>
-.el-aside {
-  color: var(--el-text-color-primary);
-  background: var(--el-color-primary-light-8);
-  width: auto;
-}
-</style>
