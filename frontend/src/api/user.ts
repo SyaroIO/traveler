@@ -4,7 +4,7 @@ import { MD5 } from 'crypto-js'
 
 const idRule = /^[A-Za-z0-9_\-.]{1,16}$/
 const emailRule =
-  /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+)\.[A-Za-z0-9]+$/
+  /^\w+((\.|-)\w+)?@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)?\.[A-Za-z0-9]+$/
 const nameRule = /^.{1,50}$/
 
 export const encryptPassword = (password: string) => MD5(password).toString()

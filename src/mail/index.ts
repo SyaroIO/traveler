@@ -13,7 +13,7 @@ export interface MailConfig {
     }
 }
 const emailRegexp =
-    /^\w+((.\w+)|(-\w+))@[A-Za-z0-9]+((.|-)[A-Za-z0-9]+)\.[A-Za-z0-9]+$/
+    /^\w+((\.|-)\w+)?@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)?\.[A-Za-z0-9]+$/
 const transporter = nodemailer.createTransport(config)
 
 export const isEmail = (email: string) =>
