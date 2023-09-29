@@ -201,10 +201,10 @@ draw()
             :transform="`translate(${x},${y})`"
           >
             <circle r="2" />
-            <text class="back" :y="-5">
+            <text class="stroke" :y="-5">
               {{ text }}
             </text>
-            <text class="front" :y="-5">
+            <text :y="-5">
               {{ text }}
             </text>
           </g>
@@ -302,14 +302,14 @@ svg.map {
 }
 
 g.province {
-  stroke: #224;
+  stroke: var(--map-path-stroke-color);
   stroke-width: 0.3;
-  fill: #000;
+  fill: var(--map-path-base-color);
 
   path:hover {
     stroke-width: 1;
-    stroke: #5d00ff;
-    fill: #fbf300
+    stroke: var(--map-path-hover-stroke-color);
+    fill: var(--map-path-hover-color);
   }
 }
 
@@ -319,13 +319,13 @@ g.texts {
 
     circle,
     text {
-      fill: #ff08;
+      fill: var(--map-text-province-color);
     }
   }
 
   circle,
   text {
-    fill: #fff8;
+    fill: var(--map-text-color);
   }
 
   text {
@@ -333,8 +333,8 @@ g.texts {
     text-anchor: middle;
   }
 
-  text.back {
-    stroke: #2248;
+  text.stroke {
+    stroke: var(--map-text-stroke-color);
     stroke-width: 3px;
   }
 }
@@ -345,8 +345,8 @@ g.texts {
   padding: 3px 8px;
   justify-content: center;
   border-radius: 4px;
-  background: linear-gradient(72deg, #110c4d56, #0d3e67);
-  border: 1px solid #0d3e67;
+  background: var(--map-tips-bg-color);
+  border: 1px solid var(--map-tips-border-color);
   backdrop-filter: blur(10px);
   transform: translate(-50%, calc(-100% - 8px));
   pointer-events: none;
@@ -365,7 +365,7 @@ g.texts {
     top: 100%;
     left: 50%;
     border: 8px solid transparent;
-    border-top: 8px solid #0d3e67;
+    border-top: 8px solid var(--map-tips-border-color);
     width: 0;
     transform: translateX(-50%);
   }
