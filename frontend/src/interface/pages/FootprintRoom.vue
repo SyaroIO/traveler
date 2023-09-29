@@ -90,27 +90,27 @@ onUnmounted(() => close?.());
           标记人数: {{ dialog.value }}
         </el-text>
       </el-col>
-      <el-col :span="6" >
+      <el-col :span="6">
         <el-row
           justify="center"
           align="middle"
         >
           <el-tooltip
+            v-if="dialog.index == dialog.mine"
             content="我也在这"
             placement="right"
-            v-if="dialog.index == dialog.mine"
-            >
+          >
             <el-button
-            circle
-            type="success"
-            size="large"
-            :icon="Location"
-          />
+              circle
+              type="success"
+              size="large"
+              :icon="Location"
+            />
           </el-tooltip>
           <el-tooltip
+            v-else
             content="标记位置"
             placement="right"
-            v-else
           >
             <el-button
               circle

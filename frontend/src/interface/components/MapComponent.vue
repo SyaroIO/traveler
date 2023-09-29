@@ -191,17 +191,20 @@ draw()
           </g>
         </g>
         <g
-          class="texts"
           v-show="p.t"
+          class="texts"
         >
           <g
             v-for="({ text, position: [x, y], province }, i) in texts"
-            :class="{ p: province }"
             :key="i"
+            :class="{ p: province }"
             :transform="`translate(${x},${y})`"
           >
             <circle r="2" />
-            <text class="stroke" :y="-5">
+            <text
+              class="stroke"
+              :y="-5"
+            >
               {{ text }}
             </text>
             <text :y="-5">
@@ -212,13 +215,13 @@ draw()
       </g>
     </svg>
     <div
-      class="hover-tips"
       v-show="hoverTips"
+      class="hover-tips"
       :style="`left: ${p.x + (hoverTips?.x ?? 0)}px; top: ${p.y + (hoverTips?.y ?? 0)}px;`"
     >
       {{ hoverTips?.name }}
     </div>
-    <teleport to='#fabbl'>
+    <teleport to="#fabbl">
       <el-row class="btn">
         <el-tooltip
           content="复原位置"
@@ -235,9 +238,9 @@ draw()
       </el-row>
       <el-row class="btn">
         <el-tooltip
+          v-if="p.t"
           content="隐藏地名"
           placement="right"
-          v-if="p.t"
         >
           <el-button
             circle
@@ -248,9 +251,9 @@ draw()
           />
         </el-tooltip>
         <el-tooltip
+          v-else
           content="显示地名"
           placement="right"
-          v-else
         >
           <el-button
             circle
@@ -262,7 +265,10 @@ draw()
         </el-tooltip>
       </el-row>
       <el-row>
-        <HSLComponent class="hsl-tool" v-model="hsl" />
+        <HSLComponent
+          v-model="hsl"
+          class="hsl-tool"
+        />
       </el-row>
     </teleport>
   </div>

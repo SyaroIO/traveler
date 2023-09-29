@@ -118,9 +118,9 @@ const closeShare = async () => {
     width="400"
   >
     <el-row
+      v-if="share.share"
       justify="center"
       align="middle"
-      v-if="share.share"
     >
       <el-col class="btn-col">
         <el-row
@@ -161,9 +161,9 @@ const closeShare = async () => {
       </el-col>
     </el-row>
     <el-row
+      v-else
       justify="center"
       align="middle"
-      v-else
     >
       <el-col class="btn-col">
         <el-row
@@ -210,9 +210,9 @@ const closeShare = async () => {
         align="middle"
       >
         <el-col
-          class="radio"
           v-for="{ text, value } of radios"
           :key="value"
+          class="radio"
           :span="8"
         >
           <el-row

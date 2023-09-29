@@ -117,7 +117,10 @@ get();
       </el-card>
     </el-space>
   </el-row>
-  <el-row class="room-row" justify="center">
+  <el-row
+    class="room-row"
+    justify="center"
+  >
     <el-card :body-style="{ padding: '10px', 'min-width': '800px' }">
       <template #header>
         <el-span>我创建的房间</el-span>
