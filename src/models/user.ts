@@ -20,15 +20,18 @@ export const register = async (doc: {
 }) =>
     users
         .insertOne(doc)
-        .then(() => true)
+        .then((ret) => !!ret.insertedId)
         .catch(() => false)
 
 const verificationByDoc = async (filter: Filter<Document>) =>
-    users.findOneAndUpdate(
-        filter,
-        { $unset: { verification: 1 } },
-        { projection: { _id: 0, password: 0 }, returnDocument: 'after' }
-    )
+    users
+        .findOneAndUpdate(
+            filter,
+            { $unset: { verification: 1 } },
+            { projection: { _id: 0, password: 0 }, returnDocument: 'after' }
+        )
+        .then(({ value }) => value)
+        .catch(() => null)
 const authenticateByDoc = async (filter: Filter<Document>) =>
     users.findOne<User>(filter, { projection: { _id: 0, password: 0 } })
 

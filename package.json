@@ -7,7 +7,7 @@
     "fullinstall": "pnpm install && cd frontend && pnpm install",
     "dev": "nodemon --config nodemon.json",
     "test": "node dist",
-    "start": "set NODE_ENV=production&&node dist",
+    "start": "set NODE_ENV=production&&node dist/src",
     "production": "set NODE_ENV=production&&nodemon --config nodemon.json",
     "clean": "rimraf dist",
     "prebuild": "rimraf -g dist/!(frontend)",

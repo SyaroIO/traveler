@@ -77,7 +77,7 @@ export const verification = async ({
             code: 1,
             message: 'Invalid parameters!'
         }
-    const data = await user.verification(email, verification)
+    const data = await user.verification(email, verification.toUpperCase())
     if (!data)
         return {
             success: false,
