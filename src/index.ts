@@ -3,7 +3,6 @@ import koaBody from 'koa-body'
 import initDatabase from '@/database/init'
 import logger from '@/middlewares/logger'
 import token from '@/middlewares/token'
-import proxy from '@/middlewares/proxy'
 import routes from '@/middlewares/router'
 import frontend from '@/middlewares/frontend'
 import log from '@/log'
@@ -23,7 +22,6 @@ async function main() {
     const host = socket?.host ?? '127.0.0.1'
     new Koa()
         .use(logger())
-        .use(proxy())
         .use(koaBody())
         .use(token())
         .use(routes())
