@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import * as geo from '@/utils/geo'
 import HSLComponent from './HSLComponent.vue';
 import { RefreshLeft, View, Hide } from '@element-plus/icons-vue'
@@ -55,13 +55,14 @@ let last = [0, 0]
 const distance = () => sqrt(abs(last[0] - p.value.x) ** 2 + abs(last[1] - p.value.y) ** 2);
 
 let down: number[] | null = null;
-const mousedown = (e: MouseEvent) => {
+const mousedown = (e: MouseEvent | Touch) => {
   isClick = true;
   down = [e.clientX ?? 0, e.clientY ?? 0]
   last = [p.value.x, p.value.y];
+  return true;
 };
 
-const mousemove = (e: MouseEvent) => {
+const mousemove = (e: MouseEvent | Touch) => {
   const { clientX, clientY } = e;
   if (!down) return;
   p.value.x = clientX - down[0] + last[0] || 0;
@@ -74,6 +75,42 @@ const mouseup = () => down = null;
 const wheel = ({ deltaY, clientX: x, clientY: y }: WheelEvent) => reScale(
   (deltaY > 0 ? 0.7 : 1.3) * p.value.s * p.value.ss, x, y
 );
+
+const touchDistance = ([
+  { clientX: x1, clientY: y1 },
+  { clientX: x2, clientY: y2 }
+]: TouchList) => Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+const touchCenter = ([
+  { clientX: x1, clientY: y1 },
+  { clientX: x2, clientY: y2 }
+]: TouchList): [number, number] => [(x1 + x2) / 2, (y1 + y2) / 2]
+let touch1 = true;
+let touch2: [number, number, number] | null = null;
+const touchstart = (e: TouchEvent) => {
+  e.preventDefault();
+  const t = e.touches;
+  const l = t.length;
+  touch1 = l == 1 && mousedown(t[0]);
+  touch2 = l == 2 ? [...touchCenter(t), p.value.s * p.value.ss / touchDistance(t)] : null;
+}
+
+const touchmove = (e: TouchEvent) => {
+  e.preventDefault();
+  const touches = e.touches;
+  if (touch1) return mousemove(touches[0]);
+  if (!touch2) return;
+  const [x, y, d] = touch2;
+  console.debug(touch2, touchDistance(touches) / d)
+  reScale(
+    touchDistance(touches) * d, x, y
+  );
+}
+
+const touchend = (e: TouchEvent) => {
+  e.preventDefault();
+  if (touch1) return mouseup();
+}
 
 const fill = (index: number) => {
   const value = props.values[index];
@@ -99,6 +136,8 @@ const reset = () => {
   geo.scale(1);
   draw()
 }
+
+onMounted(reset)
 
 window.onresize = async () => {
   const { innerWidth, innerHeight } = window;
@@ -128,6 +167,9 @@ draw()
       @mousemove="mousemove"
       @mouseup="mouseup"
       @wheel="wheel"
+      @touchstart="touchstart"
+      @touchmove="touchmove"
+      @touchend="touchend"
     >
       <filter id="hover-shadow">
         <feFlood flood-color="#000" />
