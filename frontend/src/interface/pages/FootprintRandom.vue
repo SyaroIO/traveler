@@ -11,7 +11,6 @@ const mine = ref({ m: false, v: 0 })
 onMounted(async () => {
   const { success, data } = await get();
   if (!success) return
-  console.log(data);
 
   for (const { me, records } of data) {
     if (me)
@@ -25,10 +24,6 @@ onUnmounted(() => close?.());
 </script>
 
 <template>
-  <MapComponent
-    :values="values"
-    :max="max"
-  />
   <teleport to="#fabtl">
     <el-row>
       <el-tooltip
@@ -45,4 +40,8 @@ onUnmounted(() => close?.());
       </el-tooltip>
     </el-row>
   </teleport>
+  <MapComponent
+    :values="values"
+    :max="max"
+  />
 </template>

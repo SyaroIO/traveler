@@ -77,11 +77,6 @@ const closeShare = async () => {
 </script>
 
 <template>
-  <MapComponent
-    :max="5"
-    :values="values"
-    @district-click="click"
-  />
   <teleport to="#fabtl">
     <el-row>
       <el-tooltip
@@ -112,6 +107,11 @@ const closeShare = async () => {
       </el-tooltip>
     </el-row>
   </teleport>
+  <MapComponent
+    :max="5"
+    :values="values"
+    @district-click="click"
+  />
   <el-dialog
     v-model="share.display"
     title="分享"

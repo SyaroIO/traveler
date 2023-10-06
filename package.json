@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "main": "src/index.ts",
   "scripts": {
+    "convert:geojson": "ts-node tools/geojson",
     "fullinstall": "pnpm install && cd frontend && pnpm install",
     "dev": "nodemon --config nodemon.json",
     "test": "node dist",
@@ -29,6 +30,7 @@
   },
   "dependencies": {
     "@koa/router": "^12.0.0",
+    "@types/geojson": "^7946.0.11",
     "axios": "^1.4.0",
     "jsonwebtoken": "^9.0.1",
     "koa": "^2.14.2",

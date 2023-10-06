@@ -1,21 +1,24 @@
-import geojson from '@/assets/geojson/china.json'
-import { geoMercator, geoPath } from 'd3-geo'
-import type { GeoGeometryObjects } from 'd3-geo'
+import geojson from '@/assets/geo.json'
+import type { Geometry, FeatureCollection } from 'geojson'
+import { registerMap } from 'echarts'
 
 interface Province {
   name: string
+  fullname: string
   adcode: number
   score: number
   center: [number, number]
+  province: undefined
   districts: number[]
 }
 interface District {
   name: string
+  fullname: string
   province: string
   adcode: number
   score: number
   center: [number, number]
-  geometry: GeoGeometryObjects
+  geometry: Geometry
 }
 
 export interface GeoData {
@@ -24,67 +27,43 @@ export interface GeoData {
 }
 export const { provinces, districts } = geojson as GeoData
 export const size = districts.length
-
-const gc = {
-  type: 'GeometryCollection',
-  geometries: districts.map(({ geometry }) => geometry)
-}
-
-let w = 1000
-let h = 1000
-let s = 1
-const p = geoPath()
-export const projection = geoMercator()
-const fit = () => projection.fitSize([w * s, h * s], gc)
-
+const collection = {
+  type: 'FeatureCollection',
+  features: districts.map(({ geometry }, index) => ({
+    type: 'Feature',
+    id: index,
+    properties: { name: index },
+    geometry
+  }))
+} as FeatureCollection
+registerMap('map', collection as Parameters<typeof registerMap>[1])
 export const info = (index: number) => districts.at(index)
-export const resize = (width: number, height: number) => {
-  w = width
-  h = height
-  fit()
-}
-export const scale = (scale: number) => {
-  s = scale
-  fit()
-}
-export const path = (index: number) => {
-  const d = districts.at(index)
-  if (!d) return ''
-  return p(d.geometry) ?? ''
-}
-export const center = (index: number) => {
-  const d = districts.at(index)
-  if (!d) return null
-  const center = projection(d.center)
-  if (!center) return null
-  const [x, y] = center
-  return {
-    index,
-    name: d.name,
-    x,
-    y
-  }
-}
-
-export const paths = () => districts.map(({ geometry }) => p(geometry) ?? '')
-export const centers = () => {
-  const list = [provinces, districts]
+export const centers = (scale: number) => {
+  const list = [
+    provinces.map(({ ...province }, index) => ({
+      ...province,
+      index,
+      p: true
+    })),
+    districts.map(({ ...district }, index) => ({
+      ...district,
+      index,
+      p: false
+    }))
+  ]
     .flat()
     .sort(({ score: a }, { score: b }) => b - a)
-    .map(({ center, name, province }) => ({
-      text: name,
-      province: !province,
-      position: projection(center) ?? [0, 0]
-    }))
+    .map(({ name, center: value, p }) => ({ name, value, p }))
 
   const final = []
+  const distance = 1.5 / scale
   for (const v of list) {
-    const [x, y] = v.position
+    const [x, y] = v.value
     let push = true
     for (const f of final) {
-      const [fx, fy] = f.position
+      const [fx, fy] = f.value
       const d = Math.sqrt((x - fx) ** 2 + (y - fy) ** 2)
-      if (d < 20) {
+      if (d < distance) {
         push = false
         break
       }
@@ -95,6 +74,3 @@ export const centers = () => {
   }
   return final
 }
-
-p.projection(projection)
-fit()

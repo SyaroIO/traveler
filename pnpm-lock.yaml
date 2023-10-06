@@ -8,6 +8,9 @@ dependencies:
   '@koa/router':
     specifier: ^12.0.0
     version: 12.0.0
+  '@types/geojson':
+    specifier: ^7946.0.11
+    version: 7946.0.11
   axios:
     specifier: ^1.4.0
     version: 1.4.0
@@ -494,6 +497,10 @@ packages:
     resolution: {integrity: sha512-L4HcrA05IgQyNYJj6kItuIkXrInJvsXTPC5B1i64FggWKKqSL+4hgt7asiSNva75AoLQjq29oPxFfU4GAQ6Z2w==}
     dependencies:
       '@types/node': 20.4.5
+    dev: false
+
+  /@types/geojson@7946.0.11:
+    resolution: {integrity: sha512-L7A0AINMXQpVwxHJ4jxD6/XjZ4NDufaRlUJHjNIFKYUFBH1SvOW+neaqb0VTRSLW5suSrSu19ObFEFnfNcr+qg==}
     dev: false
 
   /@types/http-assert@1.5.3:
