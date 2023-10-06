@@ -13,9 +13,11 @@ const $emit = defineEmits(['district-click'])
 
 const { abs, sqrt } = Math
 const { innerWidth, innerHeight } = window
-const p = ref({ s: 1, x: 0, y: 0, w: innerWidth, h: innerHeight, ss: 1, t: true })
-const paths = ref<ReturnType<typeof geo.paths>>([])
-const texts = ref<ReturnType<typeof geo.centers>>([])
+
+geo.resize(innerWidth, innerHeight);
+const p = ref({ s: 1, x: 0, y: 0, w: innerWidth, h: innerHeight, t: true })
+const paths = ref<ReturnType<typeof geo.paths>>(geo.paths())
+const texts = ref<ReturnType<typeof geo.centers>>(geo.centers(1))
 const hoverTips = ref<ReturnType<typeof geo.center>>(null)
 const hsl = ref({
   h: 180,
@@ -24,8 +26,7 @@ const hsl = ref({
 })
 const draw = async () => {
   await Promise.resolve(0)
-  paths.value = geo.paths()
-  texts.value = geo.centers()
+  texts.value = geo.centers(p.value.s)
   if (hoverTips.value?.index)
     hoverTips.value = geo.center(hoverTips.value.index)
 }
@@ -34,18 +35,15 @@ let delayScale = 0;
 const reScale = (s: number, cx: number, cy: number) => {
   if (s > 200) s = 200;
   if (s < 0.1) s = 0.1;
-  if (p.value.s * p.value.ss == s) return;
-  [p.value.ss, s] = [s / p.value.s, s / p.value.s / p.value.ss]
+  if (p.value.s == s) return;
+  [p.value.s, s] = [s, s / p.value.s]
   p.value.x = cx - (cx - p.value.x) * s;
   p.value.y = cy - (cy - p.value.y) * s;
   if (delayScale) clearTimeout(delayScale);
-  delayScale = setTimeout(async () => await Promise.resolve(0).then(() => {
-    p.value.s *= p.value.ss;
+  delayScale = setTimeout(() => {
     delayScale = 0;
-    geo.scale(p.value.s);
     draw();
-    p.value.ss = 1
-  }), 100);
+  }, 300);
 }
 
 let isClick = true;
@@ -73,7 +71,7 @@ const mousemove = (e: MouseEvent | Touch) => {
 const mouseup = () => down = null;
 
 const wheel = ({ deltaY, clientX: x, clientY: y }: WheelEvent) => reScale(
-  (deltaY > 0 ? 0.7 : 1.3) * p.value.s * p.value.ss, x, y
+  (deltaY > 0 ? 0.7 : 1.3) * p.value.s, x, y
 );
 
 const touchDistance = ([
@@ -92,7 +90,7 @@ const touchstart = (e: TouchEvent) => {
   const t = e.touches;
   const l = t.length;
   touch1 = l == 1 && mousedown(t[0]);
-  touch2 = l == 2 ? [...touchCenter(t), p.value.s * p.value.ss / touchDistance(t)] : null;
+  touch2 = l == 2 ? [...touchCenter(t), p.value.s / touchDistance(t)] : null;
 }
 
 const touchmove = (e: TouchEvent) => {
@@ -132,8 +130,6 @@ const reset = () => {
   p.value.x = 0
   p.value.y = 0
   p.value.s = 1
-  p.value.ss = 1
-  geo.scale(1);
   draw()
 }
 
@@ -152,8 +148,6 @@ window.onresize = async () => {
   geo.resize(p.value.w, p.value.h);
   draw();
 };
-geo.resize(innerWidth, innerHeight);
-draw()
 </script>
 
 <template>
@@ -193,7 +187,7 @@ draw()
           operator="out"
         />
         <feGaussianBlur
-          stdDeviation="1"
+          :stdDeviation="1 / p.s"
           result="blur"
         />
         <feComposite
@@ -202,11 +196,12 @@ draw()
         />
       </filter>
       <g
-        :transform="`translate(${p.x},${p.y}) scale(${p.ss})`"
+        :transform="`translate(${p.x},${p.y}) scale(${p.s})`"
       >
         <g
           class="polygons"
           filter="url(#province-shadow)"
+          :style="`stroke-width: ${0.3 / p.s}px;`"
         >
           <g
             v-for="({ districts, name: province }, i) in geo.provinces"
@@ -235,6 +230,7 @@ draw()
         <g
           v-show="p.t"
           class="texts"
+          :style="`font-size: ${10 / p.s}px; stroke-width: ${3 / p.s}px;`"
         >
           <g
             v-for="({ text, position: [x, y], province }, i) in texts"
@@ -242,14 +238,14 @@ draw()
             :class="{ p: province }"
             :transform="`translate(${x},${y})`"
           >
-            <circle r="2" />
+            <circle :r="2 / p.s" />
             <text
               class="stroke"
-              :y="-5"
+              :y="-5 / p.s"
             >
               {{ text }}
             </text>
-            <text :y="-5">
+            <text :y="-5 / p.s">
               {{ text }}
             </text>
           </g>
@@ -351,11 +347,9 @@ svg.map {
 
 g.province {
   stroke: var(--map-path-stroke-color);
-  stroke-width: 0.3;
   fill: var(--map-path-base-color);
 
   path:hover {
-    stroke-width: 1;
     stroke: var(--map-path-hover-stroke-color);
     fill: var(--map-path-hover-color);
   }
@@ -377,13 +371,11 @@ g.texts {
   }
 
   text {
-    font-size: 10px;
     text-anchor: middle;
   }
 
   text.stroke {
     stroke: var(--map-text-stroke-color);
-    stroke-width: 3px;
   }
 }
 
