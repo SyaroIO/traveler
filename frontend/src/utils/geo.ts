@@ -55,8 +55,9 @@ export const centers = (scale: number) => {
     .sort(({ score: a }, { score: b }) => b - a)
     .map(({ name, center: value, p }) => ({ name, value, p }))
 
+  const { innerWidth, innerHeight } = window
+  const distance = 2000 / Math.min(innerWidth, innerHeight) / scale
   const final = []
-  const distance = 1.5 / scale
   for (const v of list) {
     const [x, y] = v.value
     let push = true
