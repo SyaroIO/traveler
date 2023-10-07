@@ -27,6 +27,6 @@ export const rgb = (hex: string) => {
   return l.map((v) => parseInt(v, 16)) as [number, number, number]
 }
 
-const h = (n: number) => n.toString(16).padStart(2, '0')
+const h = (n: number) => Math.floor(n).toString(16).padStart(2, '0')
 export const hex = ([r, g, b]: [number, number, number], p: number) =>
   `#${h(p * r)}${h(p * g)}${h(p * b)}`
