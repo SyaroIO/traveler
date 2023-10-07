@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const roomName = ref('');
 const values = ref<number[]>(new Array(size).fill(0))
+const tooltip = (index: number) => `<strong>${info(index)?.fullname}<br /><span style="color:#88F;">${values.value[index]}</span></strong> 人标记`
 
 const dialog = ref<{
   display: boolean,
@@ -74,6 +75,7 @@ onUnmounted(() => close?.());
   <MapComponent
     :max="5"
     :values="values"
+    :tooltip="tooltip"
     @district-click="click"
   />
   <el-dialog

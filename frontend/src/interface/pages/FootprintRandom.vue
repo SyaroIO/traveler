@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { get, set } from '@/api/random'
-import { size } from '@/utils/geo'
+import { size, info } from '@/utils/geo'
 import { Location } from '@element-plus/icons-vue'
 import MapComponent from ':/components/MapComponent.vue'
 const values = ref<number[]>(new Array(size).fill(0))
 const max = ref(0)
 const mine = ref({ m: false, v: 0 })
+const tooltip = (index: number) => `<strong>${info(index)?.fullname}<br /><span style="color:#88F;">${values.value[index]}</span></strong> 人踩过`
 
 onMounted(async () => {
   const { success, data } = await get();
@@ -43,5 +44,6 @@ onUnmounted(() => close?.());
   <MapComponent
     :values="values"
     :max="max"
+    :tooltip="tooltip"
   />
 </template>

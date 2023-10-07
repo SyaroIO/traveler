@@ -45,6 +45,16 @@ const radios = [
   { value: 4, text: '住过' },
   { value: 5, text: '家乡' }
 ];
+const tooltipValues = [
+  '还未标记过',
+  '想去',
+  '路过',
+  '去过',
+  '住过',
+  '家乡'
+]
+const tooltip = (index: number) => `<strong>${info(index)?.fullname}</strong><br />${tooltipValues[values.value[index]]}`
+
 const changed = ref(new Map<number, number>());
 const change = (value: string | number | boolean) => {
   value = Number(value);
@@ -110,6 +120,7 @@ const closeShare = async () => {
   <MapComponent
     :max="5"
     :values="values"
+    :tooltip="tooltip"
     @district-click="click"
   />
   <el-dialog

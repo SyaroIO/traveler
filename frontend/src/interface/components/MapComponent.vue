@@ -10,6 +10,7 @@ import { View, Hide, Download } from '@element-plus/icons-vue'
 const props = defineProps<{
   values: number[],
   max: number,
+  tooltip: (index: number) => string,
 }>()
 const $emit = defineEmits(['district-click'])
 const chart = ref<ECharts | null>(null)
@@ -20,6 +21,7 @@ const centers = ref(geo.centers(1))
 const option = computed(() => {
   const provinces = show.value ? centers.value.filter(({ p }) => p) : []
   const districts = show.value ? centers.value.filter(({ p }) => !p) : []
+  const formatter = props.tooltip ?? ((index: number) => geo.info(index)?.fullname)
   const rgbColor = rgb(color.value)
   const regions = props.values.map((value, index) => ({
     name: '' + index,
@@ -50,7 +52,8 @@ const option = computed(() => {
   return {
     tooltip: {
       trigger: 'item',
-      renderMode: 'richText',
+      // renderMode: 'richText',
+      extraCssText: 'z-index:1;',
     },
     geo: {
       zoom: p.value.z,
@@ -64,7 +67,7 @@ const option = computed(() => {
       },
       regions,
       tooltip: {
-        formatter: ({ name }: { name: number }) => geo.info(name)?.fullname
+        formatter: ({ name }: { name: number }) => formatter(name),
       },
     },
     series: [
@@ -232,8 +235,6 @@ const download = () => {
         />
       </el-tooltip>
     </el-row>
-
-
     <el-row>
       <el-tooltip
         content="保存图片"
