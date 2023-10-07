@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import * as room from '@/api/room'
 import { Delete, Edit, Share, View } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { route } from ':/routers'
 const jRoom = ref('')
 const jPswd = ref('')
@@ -14,8 +15,12 @@ const rooms = ref<{
 }[]>([])
 
 const create = async () => {
-  const name = cName.value;
-  const pswd = cPswd.value;
+  const name = cName.value.trim();
+  const pswd = cPswd.value.trim();
+  if (pswd.length < 1) {
+    ElMessage.error('密码不能为空');
+    return;
+  }
   const { success, data: id } = await room.create(name, pswd)
   if (!success) return;
   rooms.value.push({ id, pswd, name })
@@ -28,6 +33,16 @@ const del = async (id: string) => {
 }
 
 const join = async (id: string, password: string) => {
+  id = id.trim();
+  password = password.trim();
+  if (id.length < 1) {
+    ElMessage.error('房间号不能为空');
+    return;
+  }
+  if (password.length < 1) {
+    ElMessage.error('密码不能为空');
+    return;
+  }
   route('footprint/room', { id, password })
 }
 
@@ -42,7 +57,10 @@ get();
 </script>
 
 <template>
-  <el-row justify="center">
+  <el-row
+    class="m-row"
+    justify="center"
+  >
     <el-space wrap>
       <el-card
         style="width: 280px;"
@@ -62,6 +80,7 @@ get();
               <el-input
                 v-model="cPswd"
                 placeholder="密码"
+                minlength="1"
               />
             </el-space>
           </el-col>
@@ -97,6 +116,7 @@ get();
               <el-input
                 v-model="jPswd"
                 placeholder="密码"
+                minlength="1"
               />
             </el-space>
           </el-col>
@@ -118,12 +138,12 @@ get();
     </el-space>
   </el-row>
   <el-row
-    class="room-row"
+    class="m-row"
     justify="center"
   >
     <el-card :body-style="{ padding: '10px', 'min-width': '800px' }">
       <template #header>
-        <el-span>我创建的房间</el-span>
+        <el-text>我创建的房间</el-text>
       </template>
       <el-table
         :data="rooms"
@@ -184,7 +204,7 @@ get();
 </template>
 
 <style scoped>
-.room-row {
+.m-row {
   margin-top: 10px;
 }
 </style>

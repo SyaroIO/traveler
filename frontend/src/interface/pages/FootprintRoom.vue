@@ -36,8 +36,9 @@ const click = (index: number) => {
 let close: (() => void) | null = null;
 const clickMark = async () => {
   const { success, message } = await mark(props.id, props.password, dialog.value.index);
-  if (success) ElMessage.success('标记成功')
-  else ElMessage.error('标记失败: ' + message)
+  if (!success) return ElMessage.error('标记失败: ' + message)
+  ElMessage.success('标记成功');
+  dialog.value.mine = dialog.value.index;
 }
 
 onMounted(() => {
@@ -55,7 +56,6 @@ onMounted(() => {
           for (const index in record.records)
             values.value[Number(index)] += record.records[index];
         }
-
         break;
       }
       case 'update': {
@@ -63,6 +63,8 @@ onMounted(() => {
         values.value[Number(mark)] += 1;
         if (before != null)
           values.value[Number(before)] -= 1;
+        if (dialog.value.display)
+          dialog.value.value = values.value[dialog.value.index]
         break;
       }
     }
