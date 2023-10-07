@@ -10,6 +10,7 @@ export const get = async (user: string) => {
 
 const r = () => Math.floor(497 * Math.random())
 export const set = async (user: string) => {
-    if (await random.set(user, r())) return { success: true, code: 0 }
+    const data = r()
+    if (await random.set(user, data)) return { success: true, code: 0, data }
     return { success: false, code: 1 }
 }

@@ -11,4 +11,4 @@ export const get = async () =>
       }
     }[]
   >(base)
-export const set = async () => postApi<void>(base)
+export const set = async () => postApi<number>(base)
