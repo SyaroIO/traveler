@@ -10,3 +10,9 @@ import FloatingActionButtons from './components/FloatingActionButtons.vue'
     </el-main>
   </el-container>
 </template>
+
+<style lang="scss" scoped>
+.el-main {
+  padding: 0;
+}
+</style>

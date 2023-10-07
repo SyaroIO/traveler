@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import * as geo from '@/utils/geo'
 import VChart from 'vue-echarts'
 import type { ECBasicOption } from 'echarts/types/dist/shared'
@@ -15,7 +15,7 @@ const $emit = defineEmits(['district-click'])
 const chart = ref<ECharts | null>(null)
 const show = ref(true)
 const color = ref("#0ff")
-const zoom = ref(1)
+const p = ref({ c: [innerWidth / 2, innerHeight / 2], z: 1 });
 const centers = ref(geo.centers(1))
 const option = computed(() => {
   const provinces = show.value ? centers.value.filter(({ p }) => p) : []
@@ -30,7 +30,6 @@ const option = computed(() => {
     type: 'scatter',
     coordinateSystem: 'geo',
     data,
-    roam: true,
     silent: true,
     animation: false,
     geoIndex: 0,
@@ -51,25 +50,24 @@ const option = computed(() => {
   return {
     tooltip: {
       trigger: 'item',
-      formatter: ({ name }: { name: number }) => geo.info(name)?.fullname
+      renderMode: 'richText',
     },
     geo: {
-      zoom: zoom.value,
+      zoom: p.value.z,
       map: 'map',
-      roam: true,
+      layoutCenter: p.value.c,
+      layoutSize: Math.min(innerHeight, innerWidth),
       itemStyle: { borderColor: '#224d' },
       emphasis: {
         label: { show: false },
         itemStyle: { areaColor: '#ff0' }
       },
       regions,
+      tooltip: {
+        formatter: ({ name }: { name: number }) => geo.info(name)?.fullname
+      },
     },
     series: [
-      {
-        type: 'map',
-        geoIndex: 0,
-        select: { disabled: true },
-      },
       scatter(provinces, {
         itemStyle: { color: '#fa0d' },
         label: {
@@ -84,20 +82,106 @@ const option = computed(() => {
   } as ECBasicOption;
 });
 
+watch(() => chart.value, chart => {
+  if (!chart) return;
+  const canvas = chart.getDom();
 
-let timeout = 0;
-const scale = (scale: number | undefined) => {
-  if (!scale) return;
-  zoom.value *= scale;
-  if (timeout) clearTimeout(timeout);
-  timeout = setTimeout(() => {
-    centers.value = geo.centers(zoom.value)
-    timeout = 0;
-  }, 300)
-}
-const roam = (e: { dx?: number, dy?: number, zoom?: number }) => {
-  scale(e.zoom);
-}
+  let timeout = 0;
+  const scale = (scale: number, cx: number, cy: number) => {
+    const { c: [x, y], z } = p.value;
+    const s = z * scale;
+    p.value = {
+      z: s,
+      c: [
+        x + (cx - x) * (1 - scale),
+        y + (cy - y) * (1 - scale),
+      ]
+    }
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      centers.value = geo.centers(z)
+      timeout = 0;
+    }, 300)
+  }
+  let down: {
+    c: number[],
+    p: number[],
+  } | null = null;
+  interface Point {
+    clientX: number,
+    clientY: number,
+  }
+  const md = ({ clientX, clientY }: Point) => down = { c: p.value.c, p: [clientX, clientY] }
+  const mm = ({ clientX, clientY }: Point) => {
+    if (!down) return;
+    const {
+      p: [x, y],
+      c: [ox, oy],
+    } = down;
+    p.value.c = [
+      ox + clientX - x,
+      oy + clientY - y,
+    ]
+  }
+  const mu = () => down = null
+  canvas.addEventListener('mousedown', md)
+  canvas.addEventListener('mousemove', mm)
+  canvas.addEventListener('mouseup', mu)
+  canvas.addEventListener('mouseout', mu)
+  canvas.addEventListener('wheel', ({ clientX, clientY, deltaY: wheelDelta }) => {
+    scale(wheelDelta < 0 ? 1.2 : 1 / 1.2, clientX, clientY)
+  })
+
+  const t2 = ([
+    { clientX: x1, clientY: y1 },
+    { clientX: x2, clientY: y2 }
+  ]: TouchList) => [(x1 + x2) / 2, (y1 + y2) / 2, Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)]
+
+  let touch: { c: number[], p: number[], d: number, s: number, } | null = null;
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const { touches } = e;
+    switch (touches.length) {
+      case 1: md(touches[0]); return;
+      case 2: break;
+      default: return;
+    }
+    const [cx, cy, distance] = t2(touches);
+    touch = {
+      c: p.value.c,
+      p: [cx, cy],
+      d: distance,
+      s: 1,
+    }
+    md({ clientX: cx, clientY: cy })
+  });
+  canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const { touches } = e;
+    switch (touches.length) {
+      case 1: mm(touches[0]); return;
+      case 2: break;
+      default: return;
+    }
+    const [cx, cy, distance] = t2(touches);
+    mm({ clientX: cx, clientY: cy })
+    if (!touch) return;
+    const ns = distance / touch.d;
+    const s = ns / touch.s;
+    touch.s = ns;
+    scale(s, cx, cy);
+  });
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    const { touches } = e;
+    switch (touches.length) {
+      case 0: mu(); break;
+      case 1: md(touches[0]); break;
+      default: break;
+    }
+    touch = null;
+  })
+})
 
 const download = () => {
   const url = chart.value?.getDataURL({
@@ -115,6 +199,7 @@ const download = () => {
   URL.revokeObjectURL(elink.href);
   document.body.removeChild(elink)
 }
+
 </script>
 
 <template>
@@ -176,6 +261,5 @@ const download = () => {
     :option="option"
     :update-options="{ lazyUpdate: true }"
     @click="({ name }) => $emit('district-click', name)"
-    @georoam="roam"
   />
 </template>
