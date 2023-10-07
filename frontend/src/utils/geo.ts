@@ -32,7 +32,7 @@ const collection = {
   features: districts.map(({ geometry }, index) => ({
     type: 'Feature',
     id: index,
-    properties: { name: index },
+    properties: { name: '' + index },
     geometry
   }))
 } as FeatureCollection

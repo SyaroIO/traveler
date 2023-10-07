@@ -1,4 +1,5 @@
 interface Obj {
+  /* eslint-disable  @typescript-eslint/no-explicit-any */
   [key: string | number]: any
 }
 export const merge = (src: Obj, ...args: Obj[]): Obj => {

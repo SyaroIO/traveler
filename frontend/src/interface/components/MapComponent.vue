@@ -19,10 +19,9 @@ const option = computed(() => {
   const provinces = show.value ? centers.value.filter(({ p }) => p) : []
   const districts = show.value ? centers.value.filter(({ p }) => !p) : []
   const rgbColor = rgb(color.value)
-  const regions = props.values.map((value, name) => ({
-    name, itemStyle: {
-      areaColor: hex(rgbColor, value / props.max),
-    }
+  const regions = props.values.map((value, index) => ({
+    name: '' + index,
+    itemStyle: { areaColor: hex(rgbColor, value / props.max) }
   }))
 
   const scatter = (data: { name: string | number, value: [number, number] }[], update = {}) => merge({
@@ -56,14 +55,10 @@ const option = computed(() => {
       zoom: zoom.value,
       map: 'map',
       roam: true,
-      itemStyle: {
-        borderColor: '#224d'
-      },
+      itemStyle: { borderColor: '#224d' },
       emphasis: {
         label: { show: false },
-        itemStyle: {
-          areaColor: '#ff0'
-        }
+        itemStyle: { areaColor: '#ff0' }
       },
       regions,
     },
@@ -132,7 +127,10 @@ const roam = (e: { dx?: number, dy?: number, zoom?: number }) => {
         @click="show = true"
       />
     </el-tooltip>
-    <el-color-picker v-model="color" size="large" />
+    <el-color-picker
+      v-model="color"
+      size="large"
+    />
   </teleport>
   <v-chart
     autoresize
