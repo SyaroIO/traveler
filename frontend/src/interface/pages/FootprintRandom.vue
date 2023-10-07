@@ -14,13 +14,17 @@ onMounted(async () => {
   const { success, data } = await get();
   if (!success) return
 
+  let count = 0;
   for (const { me, records } of data) {
     if (me)
       mine.value = { m: true, v: Number(Object.keys(records)[0]) }
-    for (const index in records)
+    for (const index in records) {
+      count += records[index];
       values.value[Number(index)] += records[index];
+    }
   }
   max.value = Math.max(...values.value);
+  ElMessage.success(`当前已有 ${count} 人踩过`);
 })
 onUnmounted(() => close?.());
 
