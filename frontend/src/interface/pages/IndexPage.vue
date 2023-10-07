@@ -73,7 +73,11 @@ const dialog = useDialogStore()
 
 <style type="scss" scoped>
 .el-row {
-  margin-top: 15px;
+  margin-top: 30px;
+
+  &:first-child {
+    margin-top: 60px;
+  }
 }
 
 .el-button {
